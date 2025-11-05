@@ -1,0 +1,86 @@
+{
+  "packages": [
+    {
+      "icon": "💻",
+      "name": "POS PC - Basic",
+      "price": 350000,
+      "detail": "Aplikasi untuk PC",
+      "features": [
+        "Aplikasi POS untuk PC",
+        "Sistem kasir lengkap",
+        "Manajemen inventory",
+        "Laporan penjualan",
+        "Support 6 bulan"
+      ]
+    },
+    {
+      "icon": "⭐",
+      "name": "POS PC - Premium",
+      "price": 550000,
+      "detail": "Aplikasi untuk PC",
+      "featured": true,
+      "features": [
+        "Aplikasi POS untuk PC",
+        "Sistem kasir lengkap",
+        "Manajemen inventory",
+        "Laporan penjualan",
+        "Support 1 tahun penuh",
+        "Update gratis"
+      ]
+    },
+    {
+      "icon": "📦",
+      "name": "Paket Komplet PC",
+      "price": 2910000,
+      "detail": "Siap Pakai!",
+      "features": [
+        "Perangkat PC lengkap",
+        "Printer POS thermal",
+        "Aplikasi POS terinstall",
+        "Setup & konfigurasi",
+        "Training penggunaan",
+        "Support 6 bulan"
+      ]
+    },
+    {
+      "icon": "📱",
+      "name": "POS Android - Basic",
+      "price": 350000,
+      "detail": "Aplikasi untuk Android",
+      "features": [
+        "Aplikasi POS Android",
+        "Sistem kasir mobile",
+        "Manajemen inventory",
+        "Laporan penjualan",
+        "Support 6 bulan"
+      ]
+    },
+    {
+      "icon": "🎯",
+      "name": "Paket Komplet Tablet",
+      "price": 2500000,
+      "detail": "Solusi Mobile",
+      "features": [
+        "Tablet Android berkualitas",
+        "Printer POS bluetooth",
+        "Aplikasi POS terinstall",
+        "Setup & konfigurasi",
+        "Training penggunaan",
+        "Support 6 bulan"
+      ]
+    },
+    {
+      "icon": "🔧",
+      "name": "Addon Support",
+      "price": 350000,
+      "detail": "Perpanjangan Support",
+      "features": [
+        "Support 1 tahun tambahan",
+        "Update aplikasi gratis",
+        "Konsultasi teknis",
+        "Bantuan troubleshooting",
+        "Prioritas support"
+      ]
+    }
+  ]
+}

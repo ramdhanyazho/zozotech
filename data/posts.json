@@ -1,0 +1,28 @@
+{
+  "posts": [
+    {
+      "id": "tips-memilih-pos",
+      "title": "Tips Memilih Aplikasi POS",
+      "date": "2025-11-02",
+      "excerpt": "Panduan lengkap memilih aplikasi POS yang tepat...",
+      "content": "<p>Pilih aplikasi POS yang mudah digunakan, mendukung multi-perangkat, dan memiliki laporan yang lengkap. Sesuaikan fitur dengan kebutuhan bisnis Anda.</p>",
+      "icon": "📝"
+    },
+    {
+      "id": "efisiensi-kasir",
+      "title": "Meningkatkan Efisiensi Kasir",
+      "date": "2025-10-28",
+      "excerpt": "Strategi dan tips meningkatkan efisiensi operasional...",
+      "content": "<p>Gunakan shortcut transaksi, optimalkan layout kasir, dan manfaatkan fitur sinkronisasi stok.</p>",
+      "icon": "💡"
+    },
+    {
+      "id": "website-umkm",
+      "title": "Website untuk UMKM",
+      "date": "2025-10-25",
+      "excerpt": "Mengapa setiap UMKM membutuhkan website?",
+      "content": "<p>Website meningkatkan kredibilitas, memudahkan promosi, dan memperluas jangkauan pelanggan.</p>",
+      "icon": "🚀"
+    }
+  ]
+}

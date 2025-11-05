@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin - POS Site (Static JSON Editor)</title>
+  <link rel="stylesheet" href="assets/css/style.css"/>
+  <script src="config.js"></script>
+  <style>
+    .admin-wrap{max-width:1100px;margin:40px auto;padding:20px}
+    .card{background:#fff;border:1px solid #eee;border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:0 4px 14px rgba(0,0,0,0.06)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    .row-3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px}
+    input,textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:10px}
+    label{font-weight:600;display:block;margin-bottom:6px}
+    button{padding:10px 16px;border-radius:10px;border:0;background:#4f46e5;color:#fff;font-weight:700;cursor:pointer}
+    table{width:100%;border-collapse:collapse}
+    th,td{border-bottom:1px solid #eee;padding:10px;text-align:left}
+    .muted{color:#666}
+  </style>
+</head>
+<body>
+  <div class="admin-wrap">
+    <h1>Admin Editor (Static JSON)</h1>
+    <p class="muted">Mode statis untuk GitHub Pages. Edit data di bawah, lalu klik <b>Download JSON</b>, ganti file di folder <code>/data</code> pada repository Anda, commit & push.</p>
+
+    <div class="card">
+      <h2>Konfigurasi</h2>
+      <div class="row">
+        <div>
+          <label>Nama Situs</label>
+          <input id="cfgName" type="text" placeholder="POS Solutions">
+        </div>
+        <div>
+          <label>Nomor WhatsApp (62812xxxx)</label>
+          <input id="cfgWa" type="text" placeholder="6281234567890">
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <label>Pesan WhatsApp default</label>
+        <input id="cfgWaMsg" type="text" placeholder="Halo, saya tertarik dengan produk Anda">
+      </div>
+      <div style="margin-top:12px">
+        <button id="saveCfg">Terapkan ke config.js (download)</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Posting Berita</h2>
+      <div class="row-3">
+        <div><label>Judul</label><input id="pTitle" type="text"></div>
+        <div><label>Tanggal</label><input id="pDate" type="date"></div>
+        <div><label>Ikon</label><input id="pIcon" type="text" placeholder="📝"></div>
+      </div>
+      <div style="margin-top:12px"><label>Slug (unik, huruf kecil, -)</label><input id="pSlug" type="text" placeholder="tips-memilih-pos"></div>
+      <div style="margin-top:12px"><label>Ringkas</label><input id="pExcerpt" type="text"></div>
+      <div style="margin-top:12px"><label>Konten (HTML ringan diperbolehkan)</label><textarea id="pContent" rows="6"></textarea></div>
+      <div style="margin-top:12px">
+        <button id="addPost">Tambah/Update Post</button>
+      </div>
+      <div style="margin-top:14px">
+        <table>
+          <thead><tr><th>Judul</th><th>Tanggal</th><th>Slug</th><th>Aksi</th></tr></thead>
+          <tbody id="postList"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:12px"><button id="downloadPosts">Download posts.json</button></div>
+    </div>
+
+    <div class="card">
+      <h2>Harga Paket</h2>
+      <div class="row-3">
+        <div><label>Nama Paket</label><input id="hName" type="text"></div>
+        <div><label>Harga (angka)</label><input id="hPrice" type="number"></div>
+        <div><label>Detail</label><input id="hDetail" type="text"></div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <div><label>Ikon</label><input id="hIcon" type="text" placeholder="💻"></div>
+        <div><label>Featured?</label><input id="hFeatured" type="checkbox"></div>
+      </div>
+      <div style="margin-top:12px"><label>Fitur (pisahkan baris)</label><textarea id="hFeatures" rows="4"></textarea></div>
+      <div style="margin-top:12px">
+        <button id="addPrice">Tambah/Update Paket</button>
+      </div>
+      <div style="margin-top:14px">
+        <table>
+          <thead><tr><th>Nama</th><th>Harga</th><th>Detail</th><th>Aksi</th></tr></thead>
+          <tbody id="priceList"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:12px"><button id="downloadPrices">Download prices.json</button></div>
+    </div>
+  </div>
+
+  <script src="assets/js/admin.js"></script>
+</body>
+</html>
