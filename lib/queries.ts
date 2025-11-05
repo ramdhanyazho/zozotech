@@ -1,4 +1,5 @@
 import { desc, eq } from "drizzle-orm";
+
 import { db } from "./db";
 import { packages, posts, settings } from "@/drizzle/schema";
 
@@ -12,7 +13,7 @@ export type SiteSettings = {
 const defaultSettings = {
   siteName: process.env.SITE_DEFAULT_NAME ?? "ZOZOTECH",
   whatsappNumber: null,
-  whatsappMessage: null,
+  whatsappMessage: "Halo, saya tertarik dengan produk Anda",
   currency: process.env.SITE_DEFAULT_CURRENCY ?? "Rp",
 };
 
@@ -43,7 +44,7 @@ export async function getPublishedPosts(): Promise<PublishedPost[]> {
   const rows = await db
     .select({
       id: posts.id,
-      slug: posts.slug,
+      slug: posts.id,
       title: posts.title,
       date: posts.date,
       excerpt: posts.excerpt,
@@ -67,6 +68,7 @@ export async function getAllPosts() {
 
   return rows.map((row) => ({
     ...row,
+    slug: row.id,
     published: !!row.published,
   }));
 }
@@ -74,14 +76,14 @@ export async function getAllPosts() {
 export async function getPostById(id: string) {
   const [row] = await db.select().from(posts).where(eq(posts.id, id)).limit(1);
   if (!row) return null;
-  return { ...row, published: !!row.published };
+  return { ...row, slug: row.id, published: !!row.published };
 }
 
 export async function getPostBySlug(slug: string): Promise<PublishedPost | null> {
   const [row] = await db
     .select({
       id: posts.id,
-      slug: posts.slug,
+      slug: posts.id,
       title: posts.title,
       date: posts.date,
       excerpt: posts.excerpt,
@@ -90,7 +92,7 @@ export async function getPostBySlug(slug: string): Promise<PublishedPost | null>
       published: posts.published,
     })
     .from(posts)
-    .where(eq(posts.slug, slug))
+    .where(eq(posts.id, slug))
     .limit(1);
 
   if (!row || !row.published) {

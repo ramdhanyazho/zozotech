@@ -1,56 +1,52 @@
 import "dotenv/config";
+import crypto from "node:crypto";
+
 import bcrypt from "bcrypt";
 import { eq } from "drizzle-orm";
-import { db } from "@/lib/db";
-import { settings, users } from "@/drizzle/schema";
 
-async function seedAdmin() {
-  const email = process.env.ADMIN_EMAIL;
-  const password = process.env.ADMIN_PASSWORD;
-
-  if (!email || !password) {
-    throw new Error("ADMIN_EMAIL dan ADMIN_PASSWORD harus diset di environment");
-  }
-
-  const existing = await db.select().from(users).where(eq(users.email, email)).limit(1);
-  if (existing.length > 0) {
-    console.log("Admin sudah tersedia, melewati pembuatan pengguna.");
-    return;
-  }
-
-  const passwordHash = await bcrypt.hash(password, 10);
-  await db.insert(users).values({
-    email,
-    passwordHash,
-    role: "admin",
-  });
-  console.log("Admin berhasil dibuat:", email);
-}
-
-async function seedSettings() {
-  const [row] = await db.select().from(settings).where(eq(settings.id, "site")).limit(1);
-  if (row) {
-    console.log("Pengaturan situs sudah ada, melewati.");
-    return;
-  }
-
-  await db.insert(settings).values({
-    id: "site",
-    siteName: process.env.SITE_DEFAULT_NAME ?? "ZOZOTECH",
-    currency: process.env.SITE_DEFAULT_CURRENCY ?? "Rp",
-  });
-
-  console.log("Pengaturan situs default dibuat.");
-}
+import { db } from "../lib/db";
+import { users, settings } from "../drizzle/schema";
 
 async function main() {
-  try {
-    await seedAdmin();
-    await seedSettings();
-  } catch (error) {
-    console.error("Seed gagal:", error);
-    process.exitCode = 1;
+  const email = process.env.ADMIN_EMAIL!;
+  const pwd = process.env.ADMIN_PASSWORD!;
+  if (!email || !pwd) throw new Error("ADMIN_EMAIL/ADMIN_PASSWORD belum diset");
+
+  // settings (upsert 1 row)
+  const existingSettings = await db.select().from(settings).where(eq(settings.id, "site"));
+  if (existingSettings.length === 0) {
+    await db.insert(settings).values({
+      id: "site",
+      siteName: process.env.SITE_DEFAULT_NAME || "ZOZOTECH",
+      whatsappNumber: "",
+      whatsappMessage: "Halo, saya tertarik dengan produk Anda",
+      currency: process.env.SITE_DEFAULT_CURRENCY || "Rp",
+    });
+    console.log("✅ settings seeded");
+  } else {
+    console.log("ℹ️  settings sudah ada");
+  }
+
+  // admin user (upsert by email)
+  const existing = await db.select().from(users).where(eq(users.email, email));
+  if (existing.length === 0) {
+    const hash = await bcrypt.hash(pwd, 10);
+    const id = crypto.randomUUID();
+    await db.insert(users).values({
+      id,
+      email,
+      passwordHash: hash,
+      role: "admin",
+    });
+    console.log(`✅ admin user created: ${email}`);
+  } else {
+    console.log(`ℹ️  admin user already exists: ${email}`);
   }
 }
 
-main();
+main()
+  .then(() => process.exit(0))
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });

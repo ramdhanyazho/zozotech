@@ -40,7 +40,6 @@ export async function PUT(request: NextRequest) {
       whatsappNumber,
       whatsappMessage,
       currency: payload.currency.trim(),
-      updatedAt: Math.floor(Date.now() / 1000),
     })
     .onConflictDoUpdate({
       target: settings.id,
@@ -49,7 +48,6 @@ export async function PUT(request: NextRequest) {
         whatsappNumber,
         whatsappMessage,
         currency: payload.currency.trim(),
-        updatedAt: Math.floor(Date.now() / 1000),
       },
     });
 

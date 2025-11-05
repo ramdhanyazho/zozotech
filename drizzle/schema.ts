@@ -1,48 +1,43 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { sql } from "drizzle-orm";
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
-const timestamp = () => sql`(strftime('%s','now'))`;
-const randomId = () => sql`lower(hex(randomblob(16)))`;
+const now = () => Math.floor(Date.now() / 1000);
 
 export const users = sqliteTable("users", {
-  id: text("id").primaryKey().notNull().default(randomId()),
+  id: text("id").primaryKey(),
   email: text("email").notNull().unique(),
-  passwordHash: text("password_hash").notNull(),
-  role: text("role").notNull().default(sql`'admin'`),
-  createdAt: integer("created_at", { mode: "number" }).notNull().default(timestamp()),
+  passwordHash: text("passwordHash").notNull(),
+  role: text("role").notNull().default("admin"),
+  createdAt: integer("createdAt", { mode: "number" }).notNull().default(now()),
 });
 
 export const posts = sqliteTable("posts", {
-  id: text("id").primaryKey().notNull().default(randomId()),
-  slug: text("slug").notNull().unique(),
+  id: text("id").primaryKey(), // slug
   title: text("title").notNull(),
-  date: text("date").notNull(),
+  date: text("date").notNull(), // YYYY-MM-DD
   excerpt: text("excerpt"),
   content: text("content"),
   icon: text("icon"),
-  published: integer("published", { mode: "boolean" }).notNull().default(sql`1`),
-  createdAt: integer("created_at", { mode: "number" }).notNull().default(timestamp()),
-  updatedAt: integer("updated_at", { mode: "number" }).notNull().default(timestamp()),
+  published: integer("published", { mode: "boolean" }).notNull().default(true),
+  createdAt: integer("createdAt", { mode: "number" }).notNull().default(now()),
+  updatedAt: integer("updatedAt", { mode: "number" }).notNull().default(now()),
 });
 
 export const packages = sqliteTable("packages", {
-  id: text("id").primaryKey().notNull().default(randomId()),
+  id: text("id").primaryKey(), // uuid/cuid
   name: text("name").notNull().unique(),
-  price: integer("price", { mode: "number" }).notNull(),
+  price: integer("price", { mode: "number" }).notNull().default(0),
   detail: text("detail"),
   icon: text("icon"),
-  featured: integer("featured", { mode: "boolean" }).notNull().default(sql`0`),
-  features: text("features"),
-  createdAt: integer("created_at", { mode: "number" }).notNull().default(timestamp()),
-  updatedAt: integer("updated_at", { mode: "number" }).notNull().default(timestamp()),
+  featured: integer("featured", { mode: "boolean" }).notNull().default(false),
+  features: text("features"), // JSON string array
+  createdAt: integer("createdAt", { mode: "number" }).notNull().default(now()),
+  updatedAt: integer("updatedAt", { mode: "number" }).notNull().default(now()),
 });
 
 export const settings = sqliteTable("settings", {
-  id: text("id").primaryKey().notNull().default(sql`'site'`),
-  siteName: text("site_name").notNull().default(sql`'ZOZOTECH'`),
-  whatsappNumber: text("whatsapp_number"),
-  whatsappMessage: text("whatsapp_message"),
-  currency: text("currency").notNull().default(sql`'Rp'`),
-  createdAt: integer("created_at", { mode: "number" }).notNull().default(timestamp()),
-  updatedAt: integer("updated_at", { mode: "number" }).notNull().default(timestamp()),
+  id: text("id").primaryKey().default("site"),
+  siteName: text("siteName").notNull().default("ZOZOTECH"),
+  whatsappNumber: text("whatsappNumber"),
+  whatsappMessage: text("whatsappMessage"),
+  currency: text("currency").notNull().default("Rp"),
 });

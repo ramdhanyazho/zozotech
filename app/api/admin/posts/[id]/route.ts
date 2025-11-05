@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { eq } from "drizzle-orm";
+
 import { db } from "@/lib/db";
 import { posts } from "@/drizzle/schema";
 import { getAdminSession } from "@/lib/auth";
 import { postInputSchema } from "@/lib/validators";
-import { and, eq, ne } from "drizzle-orm";
 
 type RouteParams = Promise<{ id: string }>;
 
@@ -20,7 +21,7 @@ export async function GET(_: NextRequest, { params }: { params: RouteParams }) {
     return NextResponse.json({ message: "Not found" }, { status: 404 });
   }
 
-  return NextResponse.json({ data: { ...post, published: !!post.published } });
+  return NextResponse.json({ data: { ...post, slug: post.id, published: !!post.published } });
 }
 
 export async function PUT(request: NextRequest, { params }: { params: RouteParams }) {
@@ -41,22 +42,20 @@ export async function PUT(request: NextRequest, { params }: { params: RouteParam
   }
 
   const payload = parsed.data;
+  const slug = payload.slug.trim();
 
-  const conflict = await db
-    .select({ id: posts.id })
-    .from(posts)
-    .where(and(eq(posts.slug, payload.slug.trim()), ne(posts.id, id)))
-    .limit(1);
-
-  if (conflict.length > 0) {
-    return NextResponse.json({ message: "Slug sudah digunakan" }, { status: 409 });
+  if (slug !== id) {
+    const conflict = await db.select({ id: posts.id }).from(posts).where(eq(posts.id, slug)).limit(1);
+    if (conflict.length > 0) {
+      return NextResponse.json({ message: "Slug sudah digunakan" }, { status: 409 });
+    }
   }
 
   const updated = await db
     .update(posts)
     .set({
+      id: slug,
       title: payload.title.trim(),
-      slug: payload.slug.trim(),
       date: payload.date,
       excerpt: payload.excerpt ?? null,
       content: payload.content ?? null,
