@@ -75,6 +75,16 @@ public/assets/                # File statis (CSS, JS legacy)
 - `npm run db:push` – sinkron schema ke Turso.
 - `npm run db:migrate` – menjalankan migrasi yang sudah digenerate.
 
+## Import Data JSON ke Database Turso
+
+1. Pastikan variabel lingkungan `TURSO_DATABASE_URL` dan `TURSO_AUTH_TOKEN` sudah terisi dan koneksi database berhasil.
+2. Simpan berkas JSON di folder `data/` sesuai contoh (`data/posts.json`, `data/prices.json`).
+3. Jalankan perintah berikut untuk memasukkan konten ke tabel `posts` dan `packages`:
+   ```bash
+   npm run import:json
+   ```
+   Skrip akan melewati entri yang sudah ada sehingga aman diulang kapan pun diperlukan.
+
 ## Deployment ke Vercel
 
 1. **Siapkan database Turso** (jika belum)
