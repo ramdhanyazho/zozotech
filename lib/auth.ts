@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import { eq } from "drizzle-orm";
-import { db } from "./db";
+import { getDb } from "./db";
 import { users } from "@/drizzle/schema";
 
 export const authOptions: NextAuthOptions = {
@@ -20,6 +20,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         const normalizedEmail = credentials.email.toLowerCase().trim();
+        const db = getDb();
         const [user] = await db
           .select()
           .from(users)

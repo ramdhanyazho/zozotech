@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { settings } from "@/drizzle/schema";
 import { getAdminSession } from "@/lib/auth";
 import { settingsInputSchema } from "@/lib/validators";
@@ -32,6 +32,7 @@ export async function PUT(request: NextRequest) {
   const whatsappNumber = payload.whatsappNumber?.trim() || null;
   const whatsappMessage = payload.whatsappMessage?.trim() || null;
 
+  const db = getDb();
   await db
     .insert(settings)
     .values({

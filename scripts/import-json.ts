@@ -5,10 +5,11 @@ import crypto from "node:crypto";
 import "dotenv/config";
 import { eq } from "drizzle-orm";
 
-import { db } from "../lib/db";
+import { getDb } from "../lib/db";
 import { posts, packages } from "../drizzle/schema";
 
 async function importPosts() {
+  const db = getDb();
   try {
     const raw = await fs.readFile(path.join(process.cwd(), "data", "posts.json"), "utf-8");
     const json = JSON.parse(raw);
@@ -34,6 +35,7 @@ async function importPosts() {
 }
 
 async function importPackages() {
+  const db = getDb();
   try {
     const raw = await fs.readFile(path.join(process.cwd(), "data", "prices.json"), "utf-8");
     const json = JSON.parse(raw);

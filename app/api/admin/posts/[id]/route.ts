@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { posts } from "@/drizzle/schema";
 import { getAdminSession } from "@/lib/auth";
 import { postInputSchema } from "@/lib/validators";
@@ -16,6 +16,7 @@ export async function GET(_: NextRequest, { params }: { params: RouteParams }) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
+  const db = getDb();
   const [post] = await db.select().from(posts).where(eq(posts.id, id)).limit(1);
   if (!post) {
     return NextResponse.json({ message: "Not found" }, { status: 404 });
@@ -44,6 +45,7 @@ export async function PUT(request: NextRequest, { params }: { params: RouteParam
   const payload = parsed.data;
   const slug = payload.slug.trim();
 
+  const db = getDb();
   if (slug !== id) {
     const conflict = await db.select({ id: posts.id }).from(posts).where(eq(posts.id, slug)).limit(1);
     if (conflict.length > 0) {
@@ -80,6 +82,7 @@ export async function DELETE(_: NextRequest, { params }: { params: RouteParams }
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
+  const db = getDb();
   const result = await db.delete(posts).where(eq(posts.id, id)).run();
   if (result.rowsAffected === 0) {
     return NextResponse.json({ message: "Not found" }, { status: 404 });

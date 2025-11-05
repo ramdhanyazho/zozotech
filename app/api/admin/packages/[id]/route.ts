@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { packages } from "@/drizzle/schema";
 import { getAdminSession } from "@/lib/auth";
 import { packageInputSchema } from "@/lib/validators";
@@ -39,6 +39,7 @@ export async function GET(_: NextRequest, { params }: { params: RouteParams }) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
+  const db = getDb();
   const [pkg] = await db.select().from(packages).where(eq(packages.id, id)).limit(1);
   if (!pkg) {
     return NextResponse.json({ message: "Not found" }, { status: 404 });
@@ -74,6 +75,7 @@ export async function PUT(request: NextRequest, { params }: { params: RouteParam
 
   const payload = parsed.data;
 
+  const db = getDb();
   const conflict = await db
     .select({ id: packages.id })
     .from(packages)
@@ -112,6 +114,7 @@ export async function DELETE(_: NextRequest, { params }: { params: RouteParams }
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
+  const db = getDb();
   const result = await db.delete(packages).where(eq(packages.id, id)).run();
   if (result.rowsAffected === 0) {
     return NextResponse.json({ message: "Not found" }, { status: 404 });
