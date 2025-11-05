@@ -1,6 +1,6 @@
 import { desc, eq } from "drizzle-orm";
 
-import { db } from "./db";
+import { getDb } from "./db";
 import { packages, posts, settings } from "@/drizzle/schema";
 
 export type SiteSettings = {
@@ -18,6 +18,10 @@ const defaultSettings = {
 };
 
 export async function getSiteSettings(): Promise<SiteSettings> {
+  const db = getDb({ optional: true });
+  if (!db) {
+    return defaultSettings;
+  }
   const [row] = await db.select().from(settings).limit(1);
   if (!row) {
     return defaultSettings;
@@ -41,6 +45,10 @@ export type PublishedPost = {
 };
 
 export async function getPublishedPosts(): Promise<PublishedPost[]> {
+  const db = getDb({ optional: true });
+  if (!db) {
+    return [];
+  }
   const rows = await db
     .select({
       id: posts.id,
@@ -61,6 +69,10 @@ export async function getPublishedPosts(): Promise<PublishedPost[]> {
 }
 
 export async function getAllPosts() {
+  const db = getDb({ optional: true });
+  if (!db) {
+    return [];
+  }
   const rows = await db
     .select()
     .from(posts)
@@ -74,12 +86,18 @@ export async function getAllPosts() {
 }
 
 export async function getPostById(id: string) {
+  const db = getDb({ optional: true });
+  if (!db) return null;
   const [row] = await db.select().from(posts).where(eq(posts.id, id)).limit(1);
   if (!row) return null;
   return { ...row, slug: row.id, published: !!row.published };
 }
 
 export async function getPostBySlug(slug: string): Promise<PublishedPost | null> {
+  const db = getDb({ optional: true });
+  if (!db) {
+    return null;
+  }
   const [row] = await db
     .select({
       id: posts.id,
@@ -114,6 +132,10 @@ export type PackageWithFeatures = {
 };
 
 export async function getPackages(): Promise<PackageWithFeatures[]> {
+  const db = getDb({ optional: true });
+  if (!db) {
+    return [];
+  }
   const rows = await db
     .select({
       id: packages.id,
@@ -148,6 +170,10 @@ function parseFeatures(raw: string | null): string[] {
 }
 
 export async function getPackageById(id: string): Promise<PackageWithFeatures | null> {
+  const db = getDb({ optional: true });
+  if (!db) {
+    return null;
+  }
   const [row] = await db
     .select({
       id: packages.id,

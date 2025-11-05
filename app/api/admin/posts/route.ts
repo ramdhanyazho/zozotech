@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { desc, eq } from "drizzle-orm";
 
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { posts } from "@/drizzle/schema";
 import { getAdminSession } from "@/lib/auth";
 import { postInputSchema } from "@/lib/validators";
@@ -12,6 +12,7 @@ export async function GET() {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
+  const db = getDb();
   const data = await db.select().from(posts).orderBy(desc(posts.createdAt));
 
   return NextResponse.json({
@@ -42,6 +43,7 @@ export async function POST(request: Request) {
   const payload = parsed.data;
   const slug = payload.slug.trim();
 
+  const db = getDb();
   const existing = await db.select({ id: posts.id }).from(posts).where(eq(posts.id, slug)).limit(1);
   if (existing.length > 0) {
     return NextResponse.json({ message: "Slug sudah digunakan" }, { status: 409 });

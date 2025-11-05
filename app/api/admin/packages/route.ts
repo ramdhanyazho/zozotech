@@ -1,5 +1,7 @@
+import crypto from "node:crypto";
+
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { packages } from "@/drizzle/schema";
 import { getAdminSession } from "@/lib/auth";
 import { packageInputSchema } from "@/lib/validators";
@@ -35,6 +37,7 @@ export async function GET() {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
+  const db = getDb();
   const data = await db.select().from(packages).orderBy(desc(packages.featured), desc(packages.createdAt));
   return NextResponse.json({
     data: data.map((item) => ({
@@ -65,6 +68,7 @@ export async function POST(request: Request) {
 
   const payload = parsed.data;
 
+  const db = getDb();
   const existing = await db
     .select({ id: packages.id })
     .from(packages)
@@ -76,6 +80,7 @@ export async function POST(request: Request) {
   }
 
   await db.insert(packages).values({
+    id: crypto.randomUUID(),
     name: payload.name.trim(),
     price: payload.price,
     detail: payload.detail ?? null,

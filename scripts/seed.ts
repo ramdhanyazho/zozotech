@@ -4,10 +4,11 @@ import crypto from "node:crypto";
 import bcrypt from "bcrypt";
 import { eq } from "drizzle-orm";
 
-import { db } from "../lib/db";
+import { getDb } from "../lib/db";
 import { users, settings } from "../drizzle/schema";
 
 async function main() {
+  const db = getDb();
   const email = process.env.ADMIN_EMAIL!;
   const pwd = process.env.ADMIN_PASSWORD!;
   if (!email || !pwd) throw new Error("ADMIN_EMAIL/ADMIN_PASSWORD belum diset");
