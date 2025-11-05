@@ -6,6 +6,8 @@ import { getAdminSession } from "@/lib/auth";
 import { packageInputSchema } from "@/lib/validators";
 import { and, eq, ne } from "drizzle-orm";
 
+type RouteParams = Promise<{ id: string }>;
+
 function normalizeFeatures(raw: unknown): string[] {
   if (Array.isArray(raw)) {
     return raw.map((item) => String(item).trim()).filter(Boolean);
@@ -30,13 +32,14 @@ function parseStoredFeatures(raw: string | null) {
   }
 }
 
-export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_: NextRequest, { params }: { params: RouteParams }) {
+  const { id } = await params;
   const session = await getAdminSession();
   if (!session) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const [pkg] = await db.select().from(packages).where(eq(packages.id, params.id)).limit(1);
+  const [pkg] = await db.select().from(packages).where(eq(packages.id, id)).limit(1);
   if (!pkg) {
     return NextResponse.json({ message: "Not found" }, { status: 404 });
   }
@@ -50,7 +53,8 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
   });
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: RouteParams }) {
+  const { id } = await params;
   const session = await getAdminSession();
   if (!session) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -73,7 +77,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   const conflict = await db
     .select({ id: packages.id })
     .from(packages)
-    .where(and(eq(packages.name, payload.name.trim()), ne(packages.id, params.id)))
+    .where(and(eq(packages.name, payload.name.trim()), ne(packages.id, id)))
     .limit(1);
 
   if (conflict.length > 0) {
@@ -91,7 +95,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       features: JSON.stringify(payload.features ?? []),
       updatedAt: Math.floor(Date.now() / 1000),
     })
-    .where(eq(packages.id, params.id))
+    .where(eq(packages.id, id))
     .run();
 
   if (result.rowsAffected === 0) {
@@ -101,13 +105,14 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   return NextResponse.json({ message: "Package updated" });
 }
 
-export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_: NextRequest, { params }: { params: RouteParams }) {
+  const { id } = await params;
   const session = await getAdminSession();
   if (!session) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const result = await db.delete(packages).where(eq(packages.id, params.id)).run();
+  const result = await db.delete(packages).where(eq(packages.id, id)).run();
   if (result.rowsAffected === 0) {
     return NextResponse.json({ message: "Not found" }, { status: 404 });
   }
