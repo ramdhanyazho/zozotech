@@ -6,13 +6,16 @@ import { getAdminSession } from "@/lib/auth";
 import { postInputSchema } from "@/lib/validators";
 import { and, eq, ne } from "drizzle-orm";
 
-export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
+type RouteParams = Promise<{ id: string }>;
+
+export async function GET(_: NextRequest, { params }: { params: RouteParams }) {
+  const { id } = await params;
   const session = await getAdminSession();
   if (!session) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const [post] = await db.select().from(posts).where(eq(posts.id, params.id)).limit(1);
+  const [post] = await db.select().from(posts).where(eq(posts.id, id)).limit(1);
   if (!post) {
     return NextResponse.json({ message: "Not found" }, { status: 404 });
   }
@@ -20,7 +23,8 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
   return NextResponse.json({ data: { ...post, published: !!post.published } });
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: RouteParams }) {
+  const { id } = await params;
   const session = await getAdminSession();
   if (!session) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -41,7 +45,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   const conflict = await db
     .select({ id: posts.id })
     .from(posts)
-    .where(and(eq(posts.slug, payload.slug.trim()), ne(posts.id, params.id)))
+    .where(and(eq(posts.slug, payload.slug.trim()), ne(posts.id, id)))
     .limit(1);
 
   if (conflict.length > 0) {
@@ -60,7 +64,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       published: payload.published,
       updatedAt: Math.floor(Date.now() / 1000),
     })
-    .where(eq(posts.id, params.id))
+    .where(eq(posts.id, id))
     .run();
 
   if (updated.rowsAffected === 0) {
@@ -70,13 +74,14 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   return NextResponse.json({ message: "Post updated" });
 }
 
-export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_: NextRequest, { params }: { params: RouteParams }) {
+  const { id } = await params;
   const session = await getAdminSession();
   if (!session) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const result = await db.delete(posts).where(eq(posts.id, params.id)).run();
+  const result = await db.delete(posts).where(eq(posts.id, id)).run();
   if (result.rowsAffected === 0) {
     return NextResponse.json({ message: "Not found" }, { status: 404 });
   }

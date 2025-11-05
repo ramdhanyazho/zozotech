@@ -5,11 +5,12 @@ import { getPostBySlug, getSiteSettings } from "@/lib/queries";
 export default async function ArticleDetailPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
+  const { slug } = await params;
   const [settings, post] = await Promise.all([
     getSiteSettings(),
-    getPostBySlug(params.slug),
+    getPostBySlug(slug),
   ]);
 
   if (!post) {
