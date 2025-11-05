@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { desc, eq } from "drizzle-orm";
+
 import { db } from "@/lib/db";
 import { posts } from "@/drizzle/schema";
 import { getAdminSession } from "@/lib/auth";
 import { postInputSchema } from "@/lib/validators";
-import { desc, eq } from "drizzle-orm";
 
 export async function GET() {
   const session = await getAdminSession();
@@ -16,6 +17,7 @@ export async function GET() {
   return NextResponse.json({
     data: data.map((item) => ({
       ...item,
+      slug: item.id,
       published: !!item.published,
     })),
   });
@@ -38,15 +40,16 @@ export async function POST(request: Request) {
   }
 
   const payload = parsed.data;
+  const slug = payload.slug.trim();
 
-  const existing = await db.select({ id: posts.id }).from(posts).where(eq(posts.slug, payload.slug.trim())).limit(1);
+  const existing = await db.select({ id: posts.id }).from(posts).where(eq(posts.id, slug)).limit(1);
   if (existing.length > 0) {
     return NextResponse.json({ message: "Slug sudah digunakan" }, { status: 409 });
   }
 
   await db.insert(posts).values({
+    id: slug,
     title: payload.title.trim(),
-    slug: payload.slug.trim(),
     date: payload.date,
     excerpt: payload.excerpt ?? null,
     content: payload.content ?? null,
