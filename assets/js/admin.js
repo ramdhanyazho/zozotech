@@ -112,6 +112,34 @@ async function init(){
     const js = `window.SITE_CONFIG = {\n  siteName: ${JSON.stringify(siteName)},\n  whatsappNumber: ${JSON.stringify(number)},\n  whatsappMessage: ${JSON.stringify(msg)},\n  currency: 'Rp'\n};\n`;
     dl('config.js', js, 'text/javascript');
   };
+
+  const logoutBtn=document.getElementById('logoutBtn');
+  if(logoutBtn){
+    logoutBtn.onclick=()=>{
+      if(typeof window.__ADMIN_LOGOUT==='function'){
+        window.__ADMIN_LOGOUT();
+      } else {
+        const key=window.__ADMIN_SESSION_KEY||'zozotechAdminSession';
+        sessionStorage.removeItem(key);
+      }
+      location.reload();
+    };
+  }
 }
 
-document.addEventListener('DOMContentLoaded', init);
+function runAdminInit(){
+  init().catch(err=>{
+    console.error('Gagal memuat data admin:', err);
+    alert('Terjadi kesalahan saat memuat data admin. Silakan muat ulang halaman.');
+  });
+}
+
+window.startAdminEditor=function(){
+  if(window.__adminEditorStarted){ return; }
+  window.__adminEditorStarted=true;
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', runAdminInit, {once:true});
+  } else {
+    runAdminInit();
+  }
+};

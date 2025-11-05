@@ -17,11 +17,43 @@
     table{width:100%;border-collapse:collapse}
     th,td{border-bottom:1px solid #eee;padding:10px;text-align:left}
     .muted{color:#666}
+    .login-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.75);display:none;align-items:center;justify-content:center;z-index:9999;padding:20px}
+    .login-overlay.show{display:flex}
+    .login-card{background:#fff;padding:32px;border-radius:18px;max-width:360px;width:100%;box-shadow:0 20px 45px rgba(15,23,42,0.25)}
+    .login-card h2{margin-top:0;margin-bottom:20px;font-size:1.4rem;text-align:center}
+    .login-card .field{margin-bottom:16px}
+    .login-card label{margin-bottom:8px}
+    .login-card button{width:100%}
+    .login-error{color:#ef4444;font-size:.9rem;margin-top:-4px;margin-bottom:12px;display:none;text-align:center}
+    .header-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:16px;flex-wrap:wrap}
+    .logout-btn{background:#ef4444}
+    @media(max-width:720px){
+      .row,.row-3{grid-template-columns:1fr}
+      .header-bar{flex-direction:column;align-items:flex-start}
+    }
   </style>
 </head>
 <body>
+  <div id="loginOverlay" class="login-overlay" aria-hidden="true">
+    <form id="loginForm" class="login-card" autocomplete="on">
+      <h2>Masuk Admin</h2>
+      <div class="field">
+        <label for="loginUser">Username</label>
+        <input id="loginUser" name="username" type="text" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label for="loginPass">Password</label>
+        <input id="loginPass" name="password" type="password" autocomplete="current-password" required>
+      </div>
+      <p id="loginError" class="login-error">Username atau password salah.</p>
+      <button type="submit">Masuk</button>
+    </form>
+  </div>
   <div class="admin-wrap">
-    <h1>Admin Editor (Static JSON)</h1>
+    <div class="header-bar">
+      <h1>Admin Editor (Static JSON)</h1>
+      <button id="logoutBtn" type="button" class="logout-btn">Keluar</button>
+    </div>
     <p class="muted">Mode statis untuk GitHub Pages. Edit data di bawah, lalu klik <b>Download JSON</b>, ganti file di folder <code>/data</code> pada repository Anda, commit & push.</p>
 
     <div class="card">
@@ -92,6 +124,7 @@
     </div>
   </div>
 
+  <script src="assets/js/auth.js"></script>
   <script src="assets/js/admin.js"></script>
 </body>
 </html>
