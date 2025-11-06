@@ -13,6 +13,8 @@ async function main() {
   const pwd = process.env.ADMIN_PASSWORD!;
   if (!email || !pwd) throw new Error("ADMIN_EMAIL/ADMIN_PASSWORD belum diset");
 
+  const normalizedEmail = email.trim().toLowerCase();
+
   // settings (upsert 1 row)
   const existingSettings = await db.select().from(settings).where(eq(settings.id, "site"));
   if (existingSettings.length === 0) {
@@ -29,19 +31,19 @@ async function main() {
   }
 
   // admin user (upsert by email)
-  const existing = await db.select().from(users).where(eq(users.email, email));
+  const existing = await db.select().from(users).where(eq(users.email, normalizedEmail));
   if (existing.length === 0) {
     const hash = await bcrypt.hash(pwd, 10);
     const id = crypto.randomUUID();
     await db.insert(users).values({
       id,
-      email,
+      email: normalizedEmail,
       passwordHash: hash,
       role: "admin",
     });
-    console.log(`✅ admin user created: ${email}`);
+    console.log(`✅ admin user created: ${normalizedEmail}`);
   } else {
-    console.log(`ℹ️  admin user already exists: ${email}`);
+    console.log(`ℹ️  admin user already exists: ${normalizedEmail}`);
   }
 }
 
