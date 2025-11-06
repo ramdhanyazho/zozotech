@@ -43,6 +43,9 @@ Aplikasi marketing dan landing page ZOZOTECH berbasis Next.js 15 dengan App Rout
    ```bash
    npm run seed
    ```
+   Perintah ini akan membuat/memperbarui akun admin berdasarkan `ADMIN_EMAIL` dan
+   `ADMIN_PASSWORD` yang Anda isi di `.env.local`. Password disimpan dalam bentuk
+   hash bcrypt sehingga aman untuk dipakai di produksi.
 5. **(Opsional) Import data JSON lama**
    ```bash
    npm run import:json
@@ -106,10 +109,41 @@ public/assets/                # File statis (CSS, JS legacy)
    npm run seed
    npm run import:json   # opsional
    ```
+   Setelah selesai, kredensial admin tersedia sesuai `ADMIN_EMAIL` dan
+   `ADMIN_PASSWORD` pada environment Vercel Anda.
 4. **Deploy**
    ```bash
    vercel
    vercel --prod
    ```
+
+### Endpoint darurat untuk mengatur ulang admin
+
+Jika perlu membuat atau mengganti password admin secara remote (misalnya setelah
+deployment), aplikasi menyediakan endpoint khusus `POST /api/admin/ensure-admin`.
+
+1. Set environment berikut di Vercel atau `.env.local`:
+   - `ALLOW_ADMIN_SEED=1`
+   - `ADMIN_SEED_SECRET=<token-rahasia-anda>`
+2. Kirim permintaan HTTP dengan header `x-admin-seed-secret` berisi nilai yang sama
+   dengan `ADMIN_SEED_SECRET`.
+3. Body JSON harus memuat `email`, `password`, dan opsional `role` (default `admin`).
+
+Contoh cURL:
+
+```bash
+curl -X POST "$NEXTAUTH_URL/api/admin/ensure-admin" \
+  -H "Content-Type: application/json" \
+  -H "x-admin-seed-secret: $ADMIN_SEED_SECRET" \
+  -d '{
+        "email": "admin@zozotech.local",
+        "password": "passwordBaru123",
+        "role": "admin"
+      }'
+```
+
+Endpoint ini aman untuk digunakan berulang karena akan melakukan upsert berdasarkan
+email: bila akun belum ada akan dibuat, bila sudah ada hanya password dan role yang
+diperbarui.
 
 Setelah deploy, gunakan kredensial admin untuk login di `/login`. Panel admin tersedia di `/admin` dan seluruh API admin telah diproteksi.
