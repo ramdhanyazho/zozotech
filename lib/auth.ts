@@ -2,6 +2,8 @@ import type { NextAuthOptions, Session } from "next-auth";
 import { getServerSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
+import { randomUUID } from "node:crypto";
+
 import { eq } from "drizzle-orm";
 import { getDb } from "./db";
 import { users } from "@/drizzle/schema";
@@ -28,7 +30,45 @@ export const authOptions: NextAuthOptions = {
           .limit(1);
 
         if (!user) {
-          return null;
+          const envEmail = process.env.ADMIN_EMAIL?.toLowerCase().trim();
+          const envPassword = process.env.ADMIN_PASSWORD;
+
+          const matchesEnvCredentials =
+            envEmail && envPassword && normalizedEmail === envEmail && credentials.password === envPassword;
+
+          if (!matchesEnvCredentials) {
+            return null;
+          }
+
+          const passwordHash = await bcrypt.hash(envPassword, 10);
+          const adminId = randomUUID();
+
+          await db
+            .insert(users)
+            .values({
+              id: adminId,
+              email: envEmail,
+              passwordHash,
+              role: "admin",
+            })
+            .onConflictDoNothing({ target: users.email });
+
+          const [createdUser] = await db
+            .select()
+            .from(users)
+            .where(eq(users.email, envEmail))
+            .limit(1);
+
+          if (!createdUser) {
+            return null;
+          }
+
+          return {
+            id: createdUser.id,
+            email: createdUser.email,
+            role: createdUser.role,
+            name: createdUser.email,
+          } as any;
         }
 
         const valid = await bcrypt.compare(credentials.password, user.passwordHash);
