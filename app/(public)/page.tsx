@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import { getPackages, getPublishedPosts, getSiteSettings } from "@/lib/queries";
+import { Navbar } from "@/components/navbar";
 
 export const revalidate = 0;
 
@@ -37,39 +37,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <nav id="navbar">
-        <div className="nav-container">
-          <div className="logo" id="logo">
-            <Image
-              src="/logo-zozotech.svg"
-              alt={siteSettings.siteName}
-              width={140}
-              height={140}
-              sizes="140px"
-              priority
-            />
-          </div>
-          <ul className="nav-menu" id="navMenu">
-            <li>
-              <a href="#beranda" className="active">
-                Beranda
-              </a>
-            </li>
-            <li>
-              <a href="#service">Service</a>
-            </li>
-            <li>
-              <a href="#artikel">Artikel</a>
-            </li>
-            <li>
-              <a href="#about">About</a>
-            </li>
-            <li>
-              <a href="#contact">Kontak</a>
-            </li>
-          </ul>
-        </div>
-      </nav>
+      <Navbar siteName={siteSettings.siteName} />
 
       <div className="hero" id="beranda">
         <div className="hero-content">
