@@ -22,20 +22,30 @@ function collectMissing(keys: string[]) {
 const dbEnv = ["TURSO_DATABASE_URL", "TURSO_AUTH_TOKEN"];
 const seedEnv = ["ADMIN_EMAIL", "ADMIN_PASSWORD"];
 
+const isVercel = process.env.VERCEL === "1";
+
 const missingDb = collectMissing(dbEnv);
 const missingSeed = collectMissing(seedEnv);
 
-if (missingDb.length > 0) {
+if (isVercel) {
   console.warn(
-    `Skipping \"npm run db:push\" because missing environment variables: ${missingDb.join(", ")}`,
+    "Skipping \"npm run db:push\" in Vercel build environment to avoid running migrations during deployment.",
+  );
+} else if (missingDb.length > 0) {
+  console.warn(
+    `Skipping "npm run db:push" because missing environment variables: ${missingDb.join(", ")}`,
   );
 } else {
   run("npm", ["run", "db:push"]);
 }
 
-if (missingSeed.length > 0) {
+if (isVercel) {
   console.warn(
-    `Skipping \"npm run seed\" because missing environment variables: ${missingSeed.join(", ")}`,
+    "Skipping \"npm run seed\" in Vercel build environment to avoid mutating the database during deployment.",
+  );
+} else if (missingSeed.length > 0) {
+  console.warn(
+    `Skipping "npm run seed" because missing environment variables: ${missingSeed.join(", ")}`,
   );
 } else {
   run("npm", ["run", "seed"]);
