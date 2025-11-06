@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Zozotech Logo</title>
+  <desc id="desc">Circular purple gradient badge with a stylised smart home icon and Zozotech wordmark.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7b76f0" />
+      <stop offset="100%" stop-color="#5c68d9" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#ffffff" />
+    </linearGradient>
+  </defs>
+  <circle cx="256" cy="256" r="244" fill="url(#bg)" />
+  <g fill="none" stroke="url(#accent)" stroke-linecap="round" stroke-linejoin="round" stroke-width="20">
+    <path d="M128 256v-90l128-94 128 94v90" />
+    <path d="M196 302v-92h120v92" />
+    <path d="M164 326h184" />
+    <path d="M212 222h36" />
+    <path d="M264 182l22-22" />
+    <path d="M292 226l30 30" />
+  </g>
+  <g fill="url(#accent)">
+    <rect x="280" y="280" width="140" height="110" rx="18" ry="18" />
+    <path d="M324 320l56 30-56 30z" fill="#5c68d9" />
+  </g>
+  <text x="256" y="430" text-anchor="middle" font-size="72" font-family="'Poppins', 'Helvetica Neue', Arial, sans-serif" fill="#ffffff" font-weight="600">
+    Zozotech
+  </text>
+</svg>
