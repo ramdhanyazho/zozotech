@@ -20,6 +20,10 @@ function reqEnv(name: string) {
   return v;
 }
 
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
+}
+
 export async function POST(req: NextRequest) {
   try {
     // Guard global: hanya boleh bila diizinkan
@@ -35,7 +39,9 @@ export async function POST(req: NextRequest) {
 
     // Parse & validasi body
     const json = await req.json();
-    const { email, password, role } = BodySchema.parse(json);
+    const parsed = BodySchema.parse(json);
+    const email = normalizeEmail(parsed.email);
+    const { password, role } = parsed;
 
     // Env DB
     const TURSO_DATABASE_URL = reqEnv("TURSO_DATABASE_URL");

@@ -27,7 +27,12 @@ function strongRandomPassword(len = 16) {
   return out;
 }
 
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
+}
+
 async function upsertAdmin(email: string, plain: string, role = "admin") {
+  const normalizedEmail = normalizeEmail(email);
   const TURSO_DATABASE_URL = reqEnv("TURSO_DATABASE_URL");
   const TURSO_AUTH_TOKEN = reqEnv("TURSO_AUTH_TOKEN");
   const client = createClient({ url: TURSO_DATABASE_URL, authToken: TURSO_AUTH_TOKEN });
@@ -53,7 +58,7 @@ async function upsertAdmin(email: string, plain: string, role = "admin") {
         passwordHash = excluded.passwordHash,
         role = excluded.role
     `,
-    args: [id, email, hash, role],
+    args: [id, normalizedEmail, hash, role],
   });
 
   await client.close();
@@ -71,8 +76,12 @@ export async function POST(req: NextRequest) {
     }
 
     const body = BodySchema.parse(await req.json());
+    const normalizedEmail = normalizeEmail(body.email);
     await upsertAdmin(body.email, body.password, body.role);
-    return NextResponse.json({ ok: true, email: body.email, role: body.role }, { status: 200 });
+    return NextResponse.json(
+      { ok: true, email: normalizedEmail, role: body.role },
+      { status: 200 }
+    );
   } catch (e: any) {
     return NextResponse.json({ ok: false, error: e?.message ?? String(e) }, { status: 500 });
   }
@@ -97,9 +106,16 @@ export async function GET(req: NextRequest) {
     }
 
     const generated = strongRandomPassword(16);
+    const normalizedEmail = normalizeEmail(email);
     await upsertAdmin(email, generated, role);
     return NextResponse.json(
-      { ok: true, email, role, password: generated, note: "Store this password now." },
+      {
+        ok: true,
+        email: normalizedEmail,
+        role,
+        password: generated,
+        note: "Store this password now.",
+      },
       { status: 200 }
     );
   } catch (e: any) {
