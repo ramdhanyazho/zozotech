@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { getPackages, getPublishedPosts, getSiteSettings } from "@/lib/queries";
 
@@ -38,7 +39,16 @@ export default async function HomePage() {
     <>
       <nav id="navbar">
         <div className="nav-container">
-          <div className="logo" id="logo">{siteSettings.siteName}</div>
+          <div className="logo" id="logo">
+            <Image
+              src="/logo-zozotech.svg"
+              alt={siteSettings.siteName}
+              width={140}
+              height={140}
+              sizes="140px"
+              priority
+            />
+          </div>
           <ul className="nav-menu" id="navMenu">
             <li>
               <a href="#beranda" className="active">
