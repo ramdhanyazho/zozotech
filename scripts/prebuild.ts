@@ -1,52 +1,83 @@
 import "dotenv/config";
 import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 
-function run(command: string, args: string[]) {
+type PackageJson = {
+  scripts?: Record<string, string>;
+};
+
+function loadPackageJson(): PackageJson {
+  const raw = readFileSync(new URL("../package.json", import.meta.url), "utf8");
+  return JSON.parse(raw) as PackageJson;
+}
+
+function hasScript(pkg: PackageJson, name: string) {
+  return typeof pkg.scripts?.[name] === "string" && pkg.scripts[name]!.trim() !== "";
+}
+
+function runCommand(command: string, args: string[]) {
+  console.log(`[prebuild] run: ${command} ${args.join(" ")}`);
   const result = spawnSync(command, args, {
     stdio: "inherit",
-    shell: process.platform === "win32",
+    env: process.env,
   });
 
-  if (result.status !== 0) {
-    process.exit(result.status ?? 1);
+  if (result.error) {
+    throw result.error;
+  }
+
+  if (typeof result.status === "number" && result.status !== 0) {
+    throw new Error(`${command} exited with code ${result.status}`);
+  }
+
+  if (result.signal) {
+    throw new Error(`${command} terminated by signal ${result.signal}`);
   }
 }
 
-function collectMissing(keys: string[]) {
-  return keys.filter((key) => {
-    const value = process.env[key];
-    return value === undefined || value === "";
-  });
+function ensureEnv(name: string) {
+  const value = process.env[name];
+  if (!value || value.trim() === "") {
+    throw new Error(`Missing required env: ${name}`);
+  }
 }
 
-const dbEnv = ["TURSO_DATABASE_URL", "TURSO_AUTH_TOKEN"];
-const seedEnv = ["ADMIN_EMAIL", "ADMIN_PASSWORD"];
+async function main() {
+  console.log("[prebuild] start");
 
-const isVercel = process.env.VERCEL === "1";
+  const allowMigrate = process.env.ALLOW_MIGRATE_ON_VERCEL === "1";
+  if (!allowMigrate) {
+    console.log("[prebuild] skip: ALLOW_MIGRATE_ON_VERCEL!=1");
+    process.exit(0);
+  }
 
-const missingDb = collectMissing(dbEnv);
-const missingSeed = collectMissing(seedEnv);
+  ensureEnv("TURSO_DATABASE_URL");
+  ensureEnv("TURSO_AUTH_TOKEN");
 
-if (isVercel) {
-  console.warn(
-    "Skipping \"npm run db:push\" in Vercel build environment to avoid running migrations during deployment.",
-  );
-} else if (missingDb.length > 0) {
-  console.warn(
-    `Skipping "npm run db:push" because missing environment variables: ${missingDb.join(", ")}`,
-  );
-} else {
-  run("npm", ["run", "db:push"]);
+  const pkg = loadPackageJson();
+
+  runCommand("npm", ["run", "db:push"]);
+
+  if (hasScript(pkg, "seed")) {
+    runCommand("npm", ["run", "seed"]);
+  } else {
+    console.log("[prebuild] skip: no \"seed\" script");
+  }
+
+  if (process.env.RUN_IMPORT_JSON === "1") {
+    if (hasScript(pkg, "import:json")) {
+      runCommand("npm", ["run", "import:json"]);
+    } else {
+      console.log("[prebuild] skip: no \"import:json\" script");
+    }
+  }
+
+  console.log("[prebuild] success");
 }
 
-if (isVercel) {
-  console.warn(
-    "Skipping \"npm run seed\" in Vercel build environment to avoid mutating the database during deployment.",
-  );
-} else if (missingSeed.length > 0) {
-  console.warn(
-    `Skipping "npm run seed" because missing environment variables: ${missingSeed.join(", ")}`,
-  );
-} else {
-  run("npm", ["run", "seed"]);
-}
+main().catch((error) => {
+  const message = error instanceof Error ? error.message : String(error);
+  console.error(`[prebuild] error: Prebuild migration failed: ${message}`);
+  console.error("[prebuild] hint: Periksa TURSO_DATABASE_URL/TURSO_AUTH_TOKEN dan izin akses DB.");
+  process.exit(1);
+});
