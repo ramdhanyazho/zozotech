@@ -1,7 +1,7 @@
 import type { NextAuthOptions, Session } from "next-auth";
 import { getServerSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { getDb } from "./db";
 import { users } from "@/drizzle/schema";

@@ -1,7 +1,7 @@
 import "dotenv/config";
 import crypto from "node:crypto";
 
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 
 import { getDb } from "../lib/db";
