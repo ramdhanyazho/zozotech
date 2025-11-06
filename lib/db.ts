@@ -9,10 +9,12 @@ type GetDbOptions = {
 };
 
 function isBuilding() {
-  return (
-    process.env.NEXT_PHASE === "phase-production-build" ||
-    process.env.VERCEL === "1"
-  );
+  const phase = process.env.NEXT_PHASE;
+  // NEXT_PHASE hanya bernilai "phase-production-build" (atau "phase-export")
+  // ketika proses build dijalankan. Di runtime Vercel variabel VERCEL tetap
+  // bernilai "1" sehingga tidak bisa dijadikan indikator build. Hal ini
+  // menyebabkan akses database selalu dianggap terjadi saat build dan diblok.
+  return phase === "phase-production-build" || phase === "phase-export";
 }
 
 function looksLikeTursoUrl(url?: string | null): url is string {
