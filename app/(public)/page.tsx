@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { getPackages, getPublishedPosts, getSiteSettings } from "@/lib/queries";
 
+export const revalidate = 0;
+
 function formatCurrency(value: number, currency: string) {
   const formatter = new Intl.NumberFormat("id-ID");
   return `${currency} ${formatter.format(value)}`.trim();
