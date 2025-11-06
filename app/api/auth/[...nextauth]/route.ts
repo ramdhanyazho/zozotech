@@ -22,7 +22,7 @@ async function getUserByEmail(email: string) {
   return (r.rows?.[0] as any) ?? null;
 }
 
-export const authOptions: NextAuthOptions = {
+const authOptions: NextAuthOptions = {
   secret: process.env.AUTH_SECRET,
   session: { strategy: "jwt" }, // pakai JWT jika tanpa Adapter
   providers: [
