@@ -50,7 +50,9 @@ export const authOptions: NextAuthOptions = {
           }
         }
 
-        const envEmail = process.env.ADMIN_EMAIL?.toLowerCase().trim();
+        const envEmail = process.env.ADMIN_EMAIL
+          ? process.env.ADMIN_EMAIL.toLowerCase().trim()
+          : undefined;
         const envPassword = process.env.ADMIN_PASSWORD ?? "";
         const matchesEnvCredentials =
           !!envEmail &&
