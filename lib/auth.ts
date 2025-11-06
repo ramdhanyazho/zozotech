@@ -50,13 +50,15 @@ export const authOptions: NextAuthOptions = {
           }
         }
 
+        const envEmail = process.env.ADMIN_EMAIL?.toLowerCase().trim();
+        const envPassword = process.env.ADMIN_PASSWORD ?? "";
+        const matchesEnvCredentials =
+          !!envEmail &&
+          !!envPassword &&
+          normalizedEmail === envEmail &&
+          credentials.password === envPassword;
+
         if (!matchedUser) {
-          const envEmail = process.env.ADMIN_EMAIL?.toLowerCase().trim();
-          const envPassword = process.env.ADMIN_PASSWORD;
-
-          const matchesEnvCredentials =
-            envEmail && envPassword && normalizedEmail === envEmail && credentials.password === envPassword;
-
           if (!matchesEnvCredentials) {
             return null;
           }
@@ -84,16 +86,28 @@ export const authOptions: NextAuthOptions = {
             return null;
           }
 
-          return {
-            id: createdUser.id,
-            email: createdUser.email,
-            role: createdUser.role,
-            name: createdUser.email,
-          } as any;
+          matchedUser = createdUser;
         }
 
         const valid = await bcrypt.compare(credentials.password, matchedUser.passwordHash);
+
         if (!valid) {
+          if (matchesEnvCredentials) {
+            const updatedHash = await bcrypt.hash(envPassword, 10);
+
+            await db
+              .update(users)
+              .set({ passwordHash: updatedHash })
+              .where(eq(users.id, matchedUser.id));
+
+            return {
+              id: matchedUser.id,
+              email: matchedUser.email,
+              role: matchedUser.role,
+              name: matchedUser.email,
+            } as any;
+          }
+
           return null;
         }
 
