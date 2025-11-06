@@ -4,7 +4,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { randomUUID } from "node:crypto";
 
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { getDb } from "./db";
 import { users } from "@/drizzle/schema";
 
@@ -29,7 +29,28 @@ export const authOptions: NextAuthOptions = {
           .where(eq(users.email, normalizedEmail))
           .limit(1);
 
-        if (!user) {
+        let matchedUser = user;
+
+        if (!matchedUser) {
+          const [caseInsensitiveUser] = await db
+            .select()
+            .from(users)
+            .where(sql`lower(${users.email}) = ${normalizedEmail}`)
+            .limit(1);
+
+          if (caseInsensitiveUser) {
+            if (caseInsensitiveUser.email !== normalizedEmail) {
+              await db
+                .update(users)
+                .set({ email: normalizedEmail })
+                .where(eq(users.id, caseInsensitiveUser.id));
+            }
+
+            matchedUser = { ...caseInsensitiveUser, email: normalizedEmail };
+          }
+        }
+
+        if (!matchedUser) {
           const envEmail = process.env.ADMIN_EMAIL?.toLowerCase().trim();
           const envPassword = process.env.ADMIN_PASSWORD;
 
@@ -71,16 +92,16 @@ export const authOptions: NextAuthOptions = {
           } as any;
         }
 
-        const valid = await bcrypt.compare(credentials.password, user.passwordHash);
+        const valid = await bcrypt.compare(credentials.password, matchedUser.passwordHash);
         if (!valid) {
           return null;
         }
 
         return {
-          id: user.id,
-          email: user.email,
-          role: user.role,
-          name: user.email,
+          id: matchedUser.id,
+          email: matchedUser.email,
+          role: matchedUser.role,
+          name: matchedUser.email,
         } as any;
       },
     }),
