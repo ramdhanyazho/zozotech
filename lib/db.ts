@@ -8,28 +8,59 @@ type GetDbOptions = {
   optional?: boolean;
 };
 
+function isBuilding() {
+  return (
+    process.env.NEXT_PHASE === "phase-production-build" ||
+    process.env.VERCEL === "1"
+  );
+}
+
+function looksLikeTursoUrl(url?: string | null): url is string {
+  if (!url) return false;
+  return url.startsWith("libsql://") || url.startsWith("file:");
+}
+
+function requiresAuthToken(url: string) {
+  return url.startsWith("libsql://") || url.startsWith("http://") || url.startsWith("https://");
+}
+
 export function getDb(): LibSQLDatabase;
 export function getDb(options: { optional: true }): LibSQLDatabase | null;
 export function getDb(options?: GetDbOptions) {
+  const optional = options?.optional ?? false;
+
+  const allowDuringBuild = process.env.ALLOW_DB_DURING_BUILD === "1";
+  if (isBuilding() && !allowDuringBuild) {
+    if (optional) {
+      return null;
+    }
+    throw new Error(
+      "DB access is disabled during build. Set ALLOW_DB_DURING_BUILD=1 to override."
+    );
+  }
+
+  const url = process.env.TURSO_DATABASE_URL;
+  const authToken = process.env.TURSO_AUTH_TOKEN;
+
+  if (!looksLikeTursoUrl(url)) {
+    if (optional) {
+      return null;
+    }
+    throw new Error(
+      "Invalid TURSO_DATABASE_URL/TURSO_AUTH_TOKEN. Set correct credentials or use optional mode."
+    );
+  }
+
+  if (requiresAuthToken(url) && (!authToken || authToken.trim() === "")) {
+    if (optional) {
+      return null;
+    }
+    throw new Error(
+      "Invalid TURSO_DATABASE_URL/TURSO_AUTH_TOKEN. Set correct credentials or use optional mode."
+    );
+  }
+
   if (!client || !database) {
-    const url = process.env.TURSO_DATABASE_URL;
-    if (!url) {
-      if (options?.optional) {
-        return null;
-      }
-      throw new Error("TURSO_DATABASE_URL is not set");
-    }
-
-    const authToken = process.env.TURSO_AUTH_TOKEN;
-    const requiresAuthToken = /^libsql:\/\//.test(url) || /^https?:\/\//.test(url);
-
-    if (requiresAuthToken && (!authToken || authToken.trim() === "")) {
-      if (options?.optional) {
-        return null;
-      }
-      throw new Error("TURSO_AUTH_TOKEN is not set");
-    }
-
     client = createClient({
       url,
       authToken,
@@ -39,7 +70,7 @@ export function getDb(options?: GetDbOptions) {
   }
 
   if (!database) {
-    if (options?.optional) {
+    if (optional) {
       return null;
     }
     throw new Error("Failed to initialize database client");

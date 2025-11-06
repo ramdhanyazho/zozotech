@@ -3,6 +3,12 @@ import { desc, eq } from "drizzle-orm";
 import { getDb } from "./db";
 import { packages, posts, settings } from "@/drizzle/schema";
 
+function logQueryError(message: string, error: unknown) {
+  if (process.env.NODE_ENV !== "production") {
+    console.warn(`[queries] ${message}`, error);
+  }
+}
+
 export type SiteSettings = {
   siteName: string;
   whatsappNumber: string | null;
@@ -18,20 +24,25 @@ const defaultSettings = {
 };
 
 export async function getSiteSettings(): Promise<SiteSettings> {
-  const db = getDb({ optional: true });
-  if (!db) {
+  try {
+    const db = getDb({ optional: true });
+    if (!db) {
+      return defaultSettings;
+    }
+    const [row] = await db.select().from(settings).limit(1);
+    if (!row) {
+      return defaultSettings;
+    }
+    return {
+      siteName: row.siteName ?? defaultSettings.siteName,
+      whatsappNumber: row.whatsappNumber ?? defaultSettings.whatsappNumber,
+      whatsappMessage: row.whatsappMessage ?? defaultSettings.whatsappMessage,
+      currency: row.currency ?? defaultSettings.currency,
+    };
+  } catch (error) {
+    logQueryError("getSiteSettings failed", error);
     return defaultSettings;
   }
-  const [row] = await db.select().from(settings).limit(1);
-  if (!row) {
-    return defaultSettings;
-  }
-  return {
-    siteName: row.siteName ?? defaultSettings.siteName,
-    whatsappNumber: row.whatsappNumber ?? defaultSettings.whatsappNumber,
-    whatsappMessage: row.whatsappMessage ?? defaultSettings.whatsappMessage,
-    currency: row.currency ?? defaultSettings.currency,
-  };
 }
 
 export type PublishedPost = {
@@ -45,27 +56,32 @@ export type PublishedPost = {
 };
 
 export async function getPublishedPosts(): Promise<PublishedPost[]> {
-  const db = getDb({ optional: true });
-  if (!db) {
+  try {
+    const db = getDb({ optional: true });
+    if (!db) {
+      return [];
+    }
+    const rows = await db
+      .select({
+        id: posts.id,
+        slug: posts.id,
+        title: posts.title,
+        date: posts.date,
+        excerpt: posts.excerpt,
+        content: posts.content,
+        icon: posts.icon,
+      })
+      .from(posts)
+      .where(eq(posts.published, true))
+      .orderBy(desc(posts.date), desc(posts.createdAt));
+
+    return rows.map((row) => ({
+      ...row,
+    }));
+  } catch (error) {
+    logQueryError("getPublishedPosts failed", error);
     return [];
   }
-  const rows = await db
-    .select({
-      id: posts.id,
-      slug: posts.id,
-      title: posts.title,
-      date: posts.date,
-      excerpt: posts.excerpt,
-      content: posts.content,
-      icon: posts.icon,
-    })
-    .from(posts)
-    .where(eq(posts.published, true))
-    .orderBy(desc(posts.date), desc(posts.createdAt));
-
-  return rows.map((row) => ({
-    ...row,
-  }));
 }
 
 export async function getAllPosts() {
@@ -132,28 +148,33 @@ export type PackageWithFeatures = {
 };
 
 export async function getPackages(): Promise<PackageWithFeatures[]> {
-  const db = getDb({ optional: true });
-  if (!db) {
+  try {
+    const db = getDb({ optional: true });
+    if (!db) {
+      return [];
+    }
+    const rows = await db
+      .select({
+        id: packages.id,
+        name: packages.name,
+        price: packages.price,
+        detail: packages.detail,
+        icon: packages.icon,
+        featured: packages.featured,
+        features: packages.features,
+      })
+      .from(packages)
+      .orderBy(desc(packages.featured), desc(packages.createdAt));
+
+    return rows.map((row) => ({
+      ...row,
+      featured: !!row.featured,
+      features: parseFeatures(row.features),
+    }));
+  } catch (error) {
+    logQueryError("getPackages failed", error);
     return [];
   }
-  const rows = await db
-    .select({
-      id: packages.id,
-      name: packages.name,
-      price: packages.price,
-      detail: packages.detail,
-      icon: packages.icon,
-      featured: packages.featured,
-      features: packages.features,
-    })
-    .from(packages)
-    .orderBy(desc(packages.featured), desc(packages.createdAt));
-
-  return rows.map((row) => ({
-    ...row,
-    featured: !!row.featured,
-    features: parseFeatures(row.features),
-  }));
 }
 
 function parseFeatures(raw: string | null): string[] {
