@@ -90,10 +90,13 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "/login",
+    error: "/login",
   },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        token.sub = (user as any).id ?? token.sub;
+        token.email = (user as any).email ?? token.email;
         token.role = (user as any).role ?? "admin";
       }
       return token;
@@ -102,11 +105,26 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.email = token.email ?? session.user.email;
         (session.user as any).role = (token as any).role ?? "admin";
+        (session.user as any).id = token.sub ?? (session.user as any).id;
       }
       return session;
     },
   },
   secret: process.env.AUTH_SECRET,
+  cookies: {
+    sessionToken: {
+      name:
+        process.env.NODE_ENV === "production"
+          ? "__Secure-next-auth.session-token"
+          : "next-auth.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
+  },
 };
 
 export const getServerAuthSession = () => getServerSession(authOptions);
