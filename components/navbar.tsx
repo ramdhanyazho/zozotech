@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useState, type MouseEvent } from "react";
 
 interface NavbarProps {
@@ -20,6 +21,8 @@ export function Navbar({ siteName, logoUrl }: NavbarProps) {
   const [activeSection, setActiveSection] = useState(
     NAV_ITEMS.find((item) => item.isDefaultActive)?.href ?? NAV_ITEMS[0]?.href ?? ""
   );
+  const pathname = usePathname();
+  const isHomePage = pathname === "/";
 
   useEffect(() => {
     function handleResize() {
@@ -45,7 +48,7 @@ export function Navbar({ siteName, logoUrl }: NavbarProps) {
   }, []);
 
   function handleNavClick(event: MouseEvent<HTMLAnchorElement>, href: string) {
-    if (href.startsWith("#")) {
+    if (isHomePage && href.startsWith("#")) {
       event.preventDefault();
       const targetId = href.slice(1);
       const target = document.getElementById(targetId);
@@ -77,17 +80,25 @@ export function Navbar({ siteName, logoUrl }: NavbarProps) {
         </button>
 
         <ul className={`nav-menu${isMenuOpen ? " active" : ""}`} id="navMenu">
-          {NAV_ITEMS.map(({ href, label, isDefaultActive }) => (
+          {NAV_ITEMS.map(({ href, label, isDefaultActive }) => {
+            const linkHref = !isHomePage && href.startsWith("#") ? `/${href}` : href;
+
+            return (
             <li key={href}>
               <a
-                href={href}
-                className={activeSection === href || (isDefaultActive && !activeSection) ? "active" : undefined}
+                href={linkHref}
+                className={
+                  isHomePage && (activeSection === href || (isDefaultActive && !activeSection))
+                    ? "active"
+                    : undefined
+                }
                 onClick={(event) => handleNavClick(event, href)}
               >
                 {label}
               </a>
             </li>
-          ))}
+            );
+          })}
         </ul>
       </div>
     </nav>

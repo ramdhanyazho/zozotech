@@ -82,7 +82,7 @@ footer{background:#2d3748;color:#fff;text-align:center;padding:30px 20px}
 .article-card:hover{transform:translateY(-6px);box-shadow:0 14px 34px rgba(0,0,0,0.12)}
 .article-link{display:inline-block;margin-top:16px;font-weight:600;color:#4f46e5}
 .article-link:hover{text-decoration:underline}
-.article-detail{min-height:100vh;background:#f8fafc;padding-bottom:80px}
+.article-detail{min-height:100vh;background:#f8fafc;padding:120px 0 80px}
 .breadcrumb{margin:20px 0;font-weight:600}
 .breadcrumb a{color:#4f46e5}
 .article-header{text-align:center;margin-bottom:40px}
