@@ -34,6 +34,7 @@ export async function PUT(request: NextRequest) {
   const whatsappNumber = payload.whatsappNumber?.trim() || null;
   const whatsappMessage = payload.whatsappMessage?.trim() || null;
   const navbarLogoUrl = payload.navbarLogoUrl?.trim() || null;
+  const faviconUrl = payload.faviconUrl?.trim() || null;
 
   const db = getDb();
 
@@ -47,6 +48,7 @@ export async function PUT(request: NextRequest) {
         whatsappMessage,
         currency: payload.currency.trim(),
         navbarLogoUrl,
+        faviconUrl,
       })
       .onConflictDoUpdate({
         target: settings.id,
@@ -56,14 +58,15 @@ export async function PUT(request: NextRequest) {
           whatsappMessage,
           currency: payload.currency.trim(),
           navbarLogoUrl,
+          faviconUrl,
         },
       });
 
   try {
     await performUpsert();
   } catch (error) {
-    if (isMissingNavbarLogoUrlColumnError(error)) {
-      await ensureNavbarLogoUrlColumn(db);
+    if (isMissingSettingsColumnError(error)) {
+      await ensureOptionalSettingsColumns(db);
       await performUpsert();
     } else {
       throw error;
@@ -73,7 +76,7 @@ export async function PUT(request: NextRequest) {
   return NextResponse.json({ message: "Settings updated" });
 }
 
-async function ensureNavbarLogoUrlColumn(db: LibSQLDatabase) {
+async function ensureOptionalSettingsColumns(db: LibSQLDatabase) {
   const result = await db.all(sql`PRAGMA table_info(${sql.raw("settings")});`);
 
   const rows = Array.isArray(result)
@@ -82,25 +85,37 @@ async function ensureNavbarLogoUrlColumn(db: LibSQLDatabase) {
       ? (result as any).rows
       : [];
 
-  const hasColumn = rows.some((row: any) => row?.name === "navbarLogoUrl");
+  const hasNavbarLogoUrl = rows.some((row: any) => row?.name === "navbarLogoUrl");
+  const hasFaviconUrl = rows.some((row: any) => row?.name === "faviconUrl");
 
-  if (!hasColumn) {
-    try {
-      await db.run(sql.raw("ALTER TABLE settings ADD COLUMN navbarLogoUrl text DEFAULT '/logo-zozotech.svg'"));
-    } catch (error) {
-      if (!isColumnAlreadyExistsError(error)) {
-        throw error;
-      }
+  if (!hasNavbarLogoUrl) {
+    await addColumnIfMissing(db, "navbarLogoUrl", "text DEFAULT '/logo-zozotech.svg'");
+  }
+
+  if (!hasFaviconUrl) {
+    await addColumnIfMissing(db, "faviconUrl", "text DEFAULT '/favicon.svg'");
+  }
+}
+
+async function addColumnIfMissing(db: LibSQLDatabase, column: string, definition: string) {
+  try {
+    await db.run(sql.raw(`ALTER TABLE settings ADD COLUMN ${column} ${definition}`));
+  } catch (error) {
+    if (!isColumnAlreadyExistsError(error, column)) {
+      throw error;
     }
   }
 }
 
-function isMissingNavbarLogoUrlColumnError(error: unknown) {
-  return includesMessage(error, "no column named navbarLogoUrl");
+function isMissingSettingsColumnError(error: unknown) {
+  return (
+    includesMessage(error, "no column named navbarLogoUrl") ||
+    includesMessage(error, "no column named faviconUrl")
+  );
 }
 
-function isColumnAlreadyExistsError(error: unknown) {
-  return includesMessage(error, "duplicate column name: navbarLogoUrl");
+function isColumnAlreadyExistsError(error: unknown, column: string) {
+  return includesMessage(error, `duplicate column name: ${column}`);
 }
 
 function includesMessage(error: unknown, text: string) {

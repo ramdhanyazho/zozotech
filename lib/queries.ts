@@ -15,6 +15,7 @@ export type SiteSettings = {
   whatsappMessage: string | null;
   currency: string;
   navbarLogoUrl: string;
+  faviconUrl: string;
 };
 
 const defaultSettings = {
@@ -23,6 +24,7 @@ const defaultSettings = {
   whatsappMessage: "Halo, saya tertarik dengan produk Anda",
   currency: process.env.SITE_DEFAULT_CURRENCY ?? "Rp",
   navbarLogoUrl: "/logo-zozotech.svg",
+  faviconUrl: "/favicon.svg",
 };
 
 export async function getSiteSettings(): Promise<SiteSettings> {
@@ -41,6 +43,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       whatsappMessage: row.whatsappMessage ?? defaultSettings.whatsappMessage,
       currency: row.currency ?? defaultSettings.currency,
       navbarLogoUrl: row.navbarLogoUrl ?? defaultSettings.navbarLogoUrl,
+      faviconUrl: row.faviconUrl ?? defaultSettings.faviconUrl,
     };
   } catch (error) {
     logQueryError("getSiteSettings failed", error);

@@ -25,6 +25,7 @@ export const settingsInputSchema = z.object({
   whatsappMessage: z.string().optional().or(z.literal("")).nullable(),
   currency: z.string().min(1),
   navbarLogoUrl: z.string().trim().min(1).optional().or(z.literal("")).nullable(),
+  faviconUrl: z.string().trim().min(1).optional().or(z.literal("")).nullable(),
 });
 
 export type PostInput = z.infer<typeof postInputSchema>;
