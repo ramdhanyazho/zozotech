@@ -24,6 +24,8 @@
     "next-auth": "^4.24.8",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "suneditor": "^2.47.8",
+    "suneditor-react": "^3.6.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
