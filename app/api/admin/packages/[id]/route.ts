@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { getDb } from "@/lib/db";
 import { packages } from "@/drizzle/schema";
 import { getAdminSession } from "@/lib/auth";
+import { ensurePackagesPriceColumns, isMissingPackagesPriceColumnError } from "@/lib/migrations/packages";
 import { packageInputSchema } from "@/lib/validators";
 import { computeFinalPrice, isDiscountActive } from "@/utils/pricing";
 import { and, eq, ne } from "drizzle-orm";
@@ -41,6 +42,7 @@ export async function GET(_: NextRequest, { params }: { params: RouteParams }) {
   }
 
   const db = getDb();
+  await ensurePackagesPriceColumns(db);
   const [pkg] = await db.select().from(packages).where(eq(packages.id, id)).limit(1);
   if (!pkg) {
     return NextResponse.json({ message: "Not found" }, { status: 404 });
@@ -113,6 +115,7 @@ export async function PUT(request: NextRequest, { params }: { params: RouteParam
     : payload.priceOriginalIdr;
 
   const db = getDb();
+  await ensurePackagesPriceColumns(db);
   const conflict = await db
     .select({ id: packages.id })
     .from(packages)
@@ -123,22 +126,37 @@ export async function PUT(request: NextRequest, { params }: { params: RouteParam
     return NextResponse.json({ message: "Nama paket sudah digunakan" }, { status: 409 });
   }
 
-  const result = await db
-    .update(packages)
-    .set({
-      name: payload.name.trim(),
-      price: finalPrice,
-      priceOriginalIdr: payload.priceOriginalIdr,
-      discountPercent: payload.discountPercent,
-      discountActive: payload.discountActive,
-      detail: payload.detail ?? null,
-      icon: payload.icon ?? null,
-      featured: payload.featured ?? false,
-      features: JSON.stringify(payload.features ?? []),
-      updatedAt: Math.floor(Date.now() / 1000),
-    })
-    .where(eq(packages.id, id))
-    .run();
+  const performUpdate = async () => {
+    return db
+      .update(packages)
+      .set({
+        name: payload.name.trim(),
+        price: finalPrice,
+        priceOriginalIdr: payload.priceOriginalIdr,
+        discountPercent: payload.discountPercent,
+        discountActive: payload.discountActive,
+        detail: payload.detail ?? null,
+        icon: payload.icon ?? null,
+        featured: payload.featured ?? false,
+        features: JSON.stringify(payload.features ?? []),
+        updatedAt: Math.floor(Date.now() / 1000),
+      })
+      .where(eq(packages.id, id))
+      .run();
+  };
+
+  let result;
+
+  try {
+    result = await performUpdate();
+  } catch (error) {
+    if (isMissingPackagesPriceColumnError(error)) {
+      await ensurePackagesPriceColumns(db);
+      result = await performUpdate();
+    } else {
+      throw error;
+    }
+  }
 
   if (result.rowsAffected === 0) {
     return NextResponse.json({ message: "Not found" }, { status: 404 });
