@@ -16,7 +16,7 @@ nav{position:fixed;top:0;left:0;right:0;background:rgba(255,255,255,0.95);backdr
 nav.scrolled{background:#fff;box-shadow:0 2px 30px rgba(0,0,0,0.15)}
 .nav-container{max-width:1200px;margin:0 auto;padding:15px 20px;display:flex;justify-content:space-between;align-items:center}
 .logo{display:flex;align-items:center}
-.logo img{height:48px;width:auto;display:block}
+.logo img{height:60px;width:auto;display:block}
 .nav-menu{display:flex;list-style:none;gap:35px;align-items:center}
 .nav-menu a{text-decoration:none;color:#333;font-weight:500;transition:all .3s ease;position:relative;padding:5px 0}
 .nav-menu a:hover{color:#667eea}

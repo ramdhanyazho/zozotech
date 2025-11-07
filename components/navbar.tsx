@@ -61,7 +61,7 @@ export function Navbar({ siteName, logoUrl }: NavbarProps) {
     <nav id="navbar">
       <div className="nav-container">
         <div className="logo" id="logo">
-          <img src={logoUrl || "/logo-zozotech.svg"} alt={siteName} height={48} />
+          <img src={logoUrl || "/logo-zozotech.svg"} alt={siteName} height={60} />
         </div>
 
         <button
