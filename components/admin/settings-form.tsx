@@ -10,6 +10,7 @@ type SettingsFormProps = {
     whatsappMessage: string | null;
     currency: string;
     navbarLogoUrl: string;
+    faviconUrl: string;
   };
 };
 
@@ -21,10 +22,12 @@ export function SettingsForm({ settings }: SettingsFormProps) {
     whatsappMessage: settings.whatsappMessage ?? "",
     currency: settings.currency,
     navbarLogoUrl: settings.navbarLogoUrl ?? "",
+    faviconUrl: settings.faviconUrl ?? "",
   });
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const faviconInputRef = useRef<HTMLInputElement | null>(null);
   const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [uploadingAsset, setUploadingAsset] = useState<"logo" | "favicon" | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,36 +35,53 @@ export function SettingsForm({ settings }: SettingsFormProps) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  async function handleLogoUpload(file: File) {
+  async function uploadAsset(file: File, type: "logo" | "favicon") {
     setError(null);
     setMessage(null);
-    setUploading(true);
+    setUploadingAsset(type);
 
     const formData = new FormData();
     formData.append("file", file);
 
+    const endpoint = type === "logo" ? "/api/admin/upload-logo" : "/api/admin/upload-favicon";
+    const errorLabel = type === "logo" ? "logo" : "favicon";
+
     try {
-      const response = await fetch("/api/admin/upload-logo", {
+      const response = await fetch(endpoint, {
         method: "POST",
         body: formData,
       });
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
-        throw new Error(data.message || "Gagal mengunggah logo");
+        throw new Error(data.message || `Gagal mengunggah ${errorLabel}`);
       }
 
       const data = await response.json();
       if (data?.url) {
-        update("navbarLogoUrl", data.url);
-        setMessage("Logo berhasil diunggah");
+        if (type === "logo") {
+          update("navbarLogoUrl", data.url);
+          setMessage("Logo berhasil diunggah");
+        } else {
+          update("faviconUrl", data.url);
+          setMessage("Favicon berhasil diunggah");
+        }
       }
     } catch (uploadError) {
-      const defaultMessage = uploadError instanceof Error ? uploadError.message : "Gagal mengunggah logo";
+      const fallbackMessage = `Gagal mengunggah ${errorLabel}`;
+      const defaultMessage = uploadError instanceof Error ? uploadError.message || fallbackMessage : fallbackMessage;
       setError(defaultMessage);
     } finally {
-      setUploading(false);
+      setUploadingAsset(null);
     }
+  }
+
+  async function handleLogoUpload(file: File) {
+    await uploadAsset(file, "logo");
+  }
+
+  async function handleFaviconUpload(file: File) {
+    await uploadAsset(file, "favicon");
   }
 
   function onSelectLogoFile(event: React.ChangeEvent<HTMLInputElement>) {
@@ -71,6 +91,15 @@ export function SettingsForm({ settings }: SettingsFormProps) {
     }
     void handleLogoUpload(file);
     // Reset value to allow re-uploading the same file if needed
+    event.target.value = "";
+  }
+
+  function onSelectFaviconFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+    void handleFaviconUpload(file);
     event.target.value = "";
   }
 
@@ -91,6 +120,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
         whatsappMessage: form.whatsappMessage,
         currency: form.currency,
         navbarLogoUrl: form.navbarLogoUrl,
+        faviconUrl: form.faviconUrl,
       }),
     });
 
@@ -146,9 +176,9 @@ export function SettingsForm({ settings }: SettingsFormProps) {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            disabled={uploading || loading}
+            disabled={uploadingAsset !== null || loading}
           >
-            {uploading ? "Mengunggah..." : "Unggah Logo"}
+            {uploadingAsset === "logo" ? "Mengunggah..." : "Unggah Logo"}
           </button>
           {form.navbarLogoUrl && (
             <a href={form.navbarLogoUrl} target="_blank" rel="noopener noreferrer">
@@ -164,9 +194,39 @@ export function SettingsForm({ settings }: SettingsFormProps) {
           onChange={onSelectLogoFile}
         />
       </div>
+      <div>
+        <label htmlFor="faviconUrl">URL Favicon</label>
+        <input
+          id="faviconUrl"
+          value={form.faviconUrl}
+          onChange={(e) => update("faviconUrl", e.target.value)}
+          placeholder="https://example.com/favicon.png"
+        />
+        <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem", flexWrap: "wrap" }}>
+          <button
+            type="button"
+            onClick={() => faviconInputRef.current?.click()}
+            disabled={uploadingAsset !== null || loading}
+          >
+            {uploadingAsset === "favicon" ? "Mengunggah..." : "Unggah Favicon"}
+          </button>
+          {form.faviconUrl && (
+            <a href={form.faviconUrl} target="_blank" rel="noopener noreferrer">
+              Pratinjau Favicon
+            </a>
+          )}
+        </div>
+        <input
+          ref={faviconInputRef}
+          type="file"
+          accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon,.ico"
+          style={{ display: "none" }}
+          onChange={onSelectFaviconFile}
+        />
+      </div>
       {error && <p className="login-error">{error}</p>}
       {message && <p style={{ color: "#16a34a", margin: 0 }}>{message}</p>}
-      <button type="submit" disabled={loading || uploading}>
+      <button type="submit" disabled={loading || uploadingAsset !== null}>
         {loading ? "Menyimpan..." : "Simpan Pengaturan"}
       </button>
     </form>
