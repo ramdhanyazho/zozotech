@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { getPostBySlug, getSiteSettings } from "@/lib/queries";
@@ -24,9 +23,6 @@ export default async function ArticleDetailPage({
 
       <main className="article-detail">
         <div className="container">
-          <nav className="breadcrumb">
-            <Link href="/">&larr; Kembali ke beranda</Link>
-          </nav>
           <header className="article-header">
             <div className="article-icon detail">{post.icon || "📰"}</div>
             <h1>{post.title}</h1>
