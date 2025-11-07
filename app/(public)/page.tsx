@@ -29,6 +29,8 @@ export default async function HomePage() {
     getPackages(),
   ]);
 
+  const sortedPackageList = [...packageList].sort((a, b) => a.price - b.price);
+
   const baseWhatsappMessage = siteSettings.whatsappMessage?.trim() || "Halo, saya tertarik dengan layanan Anda";
 
   const whatsappUrl = siteSettings.whatsappNumber
@@ -72,10 +74,10 @@ export default async function HomePage() {
         <h2 className="section-title">Paket Aplikasi POS Kasir</h2>
         <p className="section-subtitle">Pilih paket yang sesuai dengan kebutuhan bisnis Anda</p>
         <div className="pricing-grid">
-          {packageList.length === 0 && (
+          {sortedPackageList.length === 0 && (
             <p className="muted">Belum ada paket yang dipublikasikan.</p>
           )}
-          {packageList.map((pkg) => (
+          {sortedPackageList.map((pkg) => (
             <div key={pkg.id} className={`pricing-card ${pkg.featured ? "featured" : ""}`}>
               <div className="card-icon">{pkg.icon || "💼"}</div>
               <h3>{pkg.name}</h3>
