@@ -8,6 +8,8 @@ import { deleteGalleryFiles } from "@/lib/uploader";
 
 const allowedSlugs = new Set(["open-retail", "eco-pos"]);
 
+type RouteParams = Promise<{ id: string }>;
+
 function now() {
   return Math.floor(Date.now() / 1000);
 }
@@ -34,13 +36,14 @@ function normalizeText(value: unknown) {
   return text.length > 0 ? text : null;
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: RouteParams }) {
   const admin = await authAdmin();
   if (!admin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const id = Number(params.id);
+  const { id: routeId } = await params;
+  const id = Number(routeId);
   if (!Number.isInteger(id)) {
     return NextResponse.json({ error: "invalid id" }, { status: 400 });
   }
@@ -120,13 +123,14 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   return NextResponse.json({ ok: true });
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: RouteParams }) {
   const admin = await authAdmin();
   if (!admin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const id = Number(params.id);
+  const { id: routeId } = await params;
+  const id = Number(routeId);
   if (!Number.isInteger(id)) {
     return NextResponse.json({ error: "invalid id" }, { status: 400 });
   }
