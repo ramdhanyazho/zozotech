@@ -86,9 +86,7 @@ async function ensureNavbarLogoUrlColumn(db: LibSQLDatabase) {
 
   if (!hasColumn) {
     try {
-      await db.run(
-        sql`ALTER TABLE ${sql.raw("settings")} ADD COLUMN ${sql.raw("navbarLogoUrl")} text DEFAULT ${"/logo-zozotech.svg"}`
-      );
+      await db.run(sql.raw("ALTER TABLE settings ADD COLUMN navbarLogoUrl text DEFAULT '/logo-zozotech.svg'"));
     } catch (error) {
       if (!isColumnAlreadyExistsError(error)) {
         throw error;
