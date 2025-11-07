@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { packages } from "@/drizzle/schema";
 import { getAdminSession } from "@/lib/auth";
+import { ensurePackagesPriceColumns, isMissingPackagesPriceColumnError } from "@/lib/migrations/packages";
 import { packageInputSchema } from "@/lib/validators";
 import { computeFinalPrice, isDiscountActive } from "@/utils/pricing";
 import { desc, eq } from "drizzle-orm";
@@ -39,6 +40,7 @@ export async function GET() {
   }
 
   const db = getDb();
+  await ensurePackagesPriceColumns(db);
   const data = await db.select().from(packages).orderBy(desc(packages.featured), desc(packages.createdAt));
   return NextResponse.json({
     data: data.map((item) => {
@@ -107,6 +109,7 @@ export async function POST(request: Request) {
     : payload.priceOriginalIdr;
 
   const db = getDb();
+  await ensurePackagesPriceColumns(db);
   const existing = await db
     .select({ id: packages.id })
     .from(packages)
@@ -117,18 +120,31 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Nama paket sudah digunakan" }, { status: 409 });
   }
 
-  await db.insert(packages).values({
-    id: crypto.randomUUID(),
-    name: payload.name.trim(),
-    price: finalPrice,
-    priceOriginalIdr: payload.priceOriginalIdr,
-    discountPercent: payload.discountPercent,
-    discountActive: payload.discountActive,
-    detail: payload.detail ?? null,
-    icon: payload.icon ?? null,
-    featured: payload.featured ?? false,
-    features: JSON.stringify(payload.features ?? []),
-  });
+  const performInsert = async () => {
+    await db.insert(packages).values({
+      id: crypto.randomUUID(),
+      name: payload.name.trim(),
+      price: finalPrice,
+      priceOriginalIdr: payload.priceOriginalIdr,
+      discountPercent: payload.discountPercent,
+      discountActive: payload.discountActive,
+      detail: payload.detail ?? null,
+      icon: payload.icon ?? null,
+      featured: payload.featured ?? false,
+      features: JSON.stringify(payload.features ?? []),
+    });
+  };
+
+  try {
+    await performInsert();
+  } catch (error) {
+    if (isMissingPackagesPriceColumnError(error)) {
+      await ensurePackagesPriceColumns(db);
+      await performInsert();
+    } else {
+      throw error;
+    }
+  }
 
   return NextResponse.json({ message: "Package created" }, { status: 201 });
 }
