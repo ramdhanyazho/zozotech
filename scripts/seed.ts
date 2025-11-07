@@ -24,6 +24,7 @@ async function main() {
       whatsappNumber: "",
       whatsappMessage: "Halo, saya tertarik dengan produk Anda",
       currency: process.env.SITE_DEFAULT_CURRENCY || "Rp",
+      navbarLogoUrl: "/logo-zozotech.svg",
     });
     console.log("✅ settings seeded");
   } else {

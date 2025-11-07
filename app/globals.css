@@ -1,4 +1,4 @@
-*{margin:0;padding:0;box-sizing:border-box}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
 body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;line-height:1.6;color:#333;overflow-x:hidden}
 .login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#eef2ff,#f1f5f9)}
 .login-overlay{display:flex;align-items:center;justify-content:center;padding:40px;width:100%}
@@ -57,9 +57,9 @@ nav.scrolled{background:#fff;box-shadow:0 2px 30px rgba(0,0,0,0.15)}
 .price-detail{font-size:.9em;color:#666;margin-bottom:25px}
 .features{list-style:none;margin:25px 0;text-align:left}
 .features li{padding:12px 0;color:#555;border-bottom:1px solid #eee}
-.features li:before{content:'✓';color:#667eea;font-weight:700;margin-right:10px}
+.features li:before{content:'✓';color:#667eea;font-weight:700;margin-right:10px}.feature-list{list-style:none;margin:25px 0 0;padding:0;text-align:left}.feature-list li{padding:10px 0;color:#555;border-bottom:1px solid #eee}.feature-list li:last-child{border-bottom:none}
 .order-button{display:block;width:100%;padding:15px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;text-align:center;text-decoration:none;border-radius:10px;font-weight:700;margin-top:20px;transition:all .3s ease}
-.order-button:hover{transform:scale(1.05);box-shadow:0 5px 15px rgba(102,126,234,0.4)}
+.order-button:hover{transform:scale(1.05);box-shadow:0 5px 15px rgba(102,126,234,0.4)}.package-whatsapp-button{display:flex;align-items:center;justify-content:center;margin-top:25px;padding:14px 20px;border-radius:10px;background:#25D366;color:#fff;font-weight:700;text-decoration:none;transition:transform .2s ease,box-shadow .2s ease;box-shadow:0 6px 16px rgba(37,211,102,0.35)}.package-whatsapp-button:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(37,211,102,0.4)}.package-whatsapp-button.disabled{background:#cbd5f5;color:#64748b;box-shadow:none;pointer-events:none;cursor:not-allowed}
 .web-service{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:80px 20px;text-align:center;margin-top:80px}
 .web-service h2{font-size:2.5em;margin-bottom:20px}
 .web-service p{font-size:1.2em;margin-bottom:30px;max-width:800px;margin-left:auto;margin-right:auto;opacity:.95}

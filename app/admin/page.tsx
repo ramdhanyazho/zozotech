@@ -14,6 +14,7 @@ export default async function AdminDashboardPage() {
         <p>Nama situs: <strong>{settings.siteName}</strong></p>
         <p>Nomor WhatsApp: {settings.whatsappNumber || "Belum diatur"}</p>
         <p>Mata uang: {settings.currency}</p>
+        <p>Logo navbar: {settings.navbarLogoUrl || "Menggunakan default"}</p>
       </div>
       <div className="admin-card">
         <h2>Artikel Dipublikasikan</h2>

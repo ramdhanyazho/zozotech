@@ -40,4 +40,5 @@ export const settings = sqliteTable("settings", {
   whatsappNumber: text("whatsappNumber"),
   whatsappMessage: text("whatsappMessage"),
   currency: text("currency").notNull().default("Rp"),
+  navbarLogoUrl: text("navbarLogoUrl").default("/logo-zozotech.svg"),
 });

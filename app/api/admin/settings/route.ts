@@ -31,6 +31,7 @@ export async function PUT(request: NextRequest) {
   const payload = parsed.data;
   const whatsappNumber = payload.whatsappNumber?.trim() || null;
   const whatsappMessage = payload.whatsappMessage?.trim() || null;
+  const navbarLogoUrl = payload.navbarLogoUrl?.trim() || null;
 
   const db = getDb();
   await db
@@ -41,6 +42,7 @@ export async function PUT(request: NextRequest) {
       whatsappNumber,
       whatsappMessage,
       currency: payload.currency.trim(),
+      navbarLogoUrl,
     })
     .onConflictDoUpdate({
       target: settings.id,
@@ -49,6 +51,7 @@ export async function PUT(request: NextRequest) {
         whatsappNumber,
         whatsappMessage,
         currency: payload.currency.trim(),
+        navbarLogoUrl,
       },
     });
 

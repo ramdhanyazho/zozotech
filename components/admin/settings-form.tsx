@@ -9,6 +9,7 @@ type SettingsFormProps = {
     whatsappNumber: string | null;
     whatsappMessage: string | null;
     currency: string;
+    navbarLogoUrl: string;
   };
 };
 
@@ -19,6 +20,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
     whatsappNumber: settings.whatsappNumber ?? "",
     whatsappMessage: settings.whatsappMessage ?? "",
     currency: settings.currency,
+    navbarLogoUrl: settings.navbarLogoUrl ?? "",
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -44,6 +46,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
         whatsappNumber: form.whatsappNumber,
         whatsappMessage: form.whatsappMessage,
         currency: form.currency,
+        navbarLogoUrl: form.navbarLogoUrl,
       }),
     });
 
@@ -86,6 +89,15 @@ export function SettingsForm({ settings }: SettingsFormProps) {
       <div>
         <label htmlFor="currency">Simbol Mata Uang</label>
         <input id="currency" value={form.currency} onChange={(e) => update("currency", e.target.value)} required />
+      </div>
+      <div>
+        <label htmlFor="navbarLogoUrl">URL Logo Navbar</label>
+        <input
+          id="navbarLogoUrl"
+          value={form.navbarLogoUrl}
+          onChange={(e) => update("navbarLogoUrl", e.target.value)}
+          placeholder="https://example.com/logo.png"
+        />
       </div>
       {error && <p className="login-error">{error}</p>}
       {message && <p style={{ color: "#16a34a", margin: 0 }}>{message}</p>}
