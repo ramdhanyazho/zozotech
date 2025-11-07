@@ -25,6 +25,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         <Link href="/admin">Dashboard</Link>
         <Link href="/admin/posts">Artikel</Link>
         <Link href="/admin/packages">Harga Paket</Link>
+        <Link href="/admin/gallery">Galeri Aplikasi</Link>
         <Link href="/admin/settings">Pengaturan</Link>
         <SignOutButton />
       </nav>

@@ -1,4 +1,5 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm";
+import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 
 const now = () => Math.floor(Date.now() / 1000);
 
@@ -46,3 +47,42 @@ export const settings = sqliteTable("settings", {
   navbarLogoUrl: text("navbarLogoUrl").default("/logo-zozotech.svg"),
   faviconUrl: text("faviconUrl").default("/favicon.svg"),
 });
+
+export const products = sqliteTable(
+  "products",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    name: text("name").notNull(),
+    slug: text("slug").notNull().unique(),
+    isPublished: integer("is_published", { mode: "boolean" }).notNull().default(true),
+    createdAt: integer("created_at").notNull().default(sql`(unixepoch())`),
+    updatedAt: integer("updated_at").notNull().default(sql`(unixepoch())`),
+  },
+  (t) => ({
+    slugIdx: index("idx_products_slug").on(t.slug),
+  })
+);
+
+export const galleryMedia = sqliteTable(
+  "gallery_media",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    productId: integer("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
+    slug: text("slug").notNull(),
+    title: text("title"),
+    caption: text("caption"),
+    alt: text("alt"),
+    imageUrl: text("image_url").notNull(),
+    thumbUrl: text("thumb_url").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    isCover: integer("is_cover", { mode: "boolean" }).notNull().default(false),
+    isPublished: integer("is_published", { mode: "boolean" }).notNull().default(true),
+    createdAt: integer("created_at").notNull().default(sql`(unixepoch())`),
+    updatedAt: integer("updated_at").notNull().default(sql`(unixepoch())`),
+  },
+  (t) => ({
+    slugIdx: index("idx_gallery_slug").on(t.slug),
+    productIdx: index("idx_gallery_product").on(t.productId),
+    orderIdx: index("idx_gallery_order").on(t.sortOrder),
+  })
+);

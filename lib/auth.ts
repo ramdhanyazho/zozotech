@@ -173,3 +173,7 @@ export const getAdminSession = async (): Promise<Session | null> => {
   }
   return session;
 };
+
+export const authAdmin = async () => {
+  return getAdminSession();
+};

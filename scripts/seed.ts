@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 
 import { getDb } from "../lib/db";
-import { users, settings } from "../drizzle/schema";
+import { users, settings, products } from "../drizzle/schema";
 
 async function main() {
   const db = getDb();
@@ -46,6 +46,26 @@ async function main() {
     console.log(`✅ admin user created: ${normalizedEmail}`);
   } else {
     console.log(`ℹ️  admin user already exists: ${normalizedEmail}`);
+  }
+
+  const defaults = [
+    { name: "Open Retail (PC)", slug: "open-retail" },
+    { name: "Eco POS (Android)", slug: "eco-pos" },
+  ];
+
+  for (const product of defaults) {
+    const found = await db
+      .select()
+      .from(products)
+      .where(eq(products.slug, product.slug))
+      .limit(1);
+
+    if (found.length === 0) {
+      await db.insert(products).values(product);
+      console.log(`✅ seeded product: ${product.slug}`);
+    } else {
+      console.log(`ℹ️  product already exists: ${product.slug}`);
+    }
   }
 }
 

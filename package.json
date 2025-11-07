@@ -20,6 +20,7 @@
     "dotenv": "^17.2.3",
     "drizzle-kit": "^0.24.0",
     "drizzle-orm": "^0.33.0",
+    "sharp": "^0.34.4",
     "next": "^15.0.0",
     "next-auth": "^4.24.8",
     "react": "^18.3.1",
