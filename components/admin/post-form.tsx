@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { RichTextEditor } from "./rich-text-editor";
 
 type PostFormProps = {
   post?: {
@@ -47,12 +48,18 @@ export function PostForm({ post }: PostFormProps) {
     setLoading(true);
     setError(null);
 
+    const contentValue = form.content ?? "";
+    const hasContent = contentValue
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, "")
+      .trim().length > 0;
+
     const payload = {
       title: form.title.trim(),
       slug: form.slug.trim(),
       date: form.date,
       excerpt: form.excerpt.trim() || null,
-      content: form.content.trim() || null,
+      content: hasContent ? contentValue : null,
       icon: form.icon.trim() || null,
       published: form.published,
     };
@@ -100,8 +107,11 @@ export function PostForm({ post }: PostFormProps) {
         <textarea id="excerpt" value={form.excerpt ?? ""} onChange={(e) => update("excerpt", e.target.value)} />
       </div>
       <div>
-        <label htmlFor="content">Konten (HTML ringan diperbolehkan)</label>
-        <textarea id="content" value={form.content ?? ""} onChange={(e) => update("content", e.target.value)} />
+        <label htmlFor="content">Konten Artikel</label>
+        <RichTextEditor
+          value={form.content ?? ""}
+          onChange={(value) => update("content", value)}
+        />
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
         <input
