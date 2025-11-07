@@ -7,6 +7,7 @@ import { eq } from "drizzle-orm";
 
 import { getDb } from "../lib/db";
 import { posts, packages } from "../drizzle/schema";
+import { computeFinalPrice } from "../utils/pricing";
 
 async function importPosts() {
   const db = getDb();
@@ -43,10 +44,20 @@ async function importPackages() {
       if (!p.name) continue;
       const exists = await db.select().from(packages).where(eq(packages.name, p.name));
       const id = crypto.randomUUID();
+      const rawPrice = Number(p.priceOriginalIdr ?? p.price ?? 0);
+      const discountPercent = Math.min(100, Math.max(0, Number(p.discountPercent ?? 0)));
+      const discountActive = Boolean(p.discountActive);
+      const finalPrice = discountActive && discountPercent > 0
+        ? computeFinalPrice(rawPrice, discountPercent)
+        : rawPrice;
+
       const row = {
         id: exists[0]?.id || id,
         name: p.name,
-        price: Number(p.price || 0),
+        price: finalPrice,
+        priceOriginalIdr: rawPrice,
+        discountPercent,
+        discountActive,
         detail: p.detail || "",
         icon: p.icon || "💼",
         featured: !!p.featured as unknown as boolean,

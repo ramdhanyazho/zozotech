@@ -26,6 +26,9 @@ export const packages = sqliteTable("packages", {
   id: text("id").primaryKey(), // uuid/cuid
   name: text("name").notNull().unique(),
   price: integer("price", { mode: "number" }).notNull().default(0),
+  priceOriginalIdr: integer("price_original_idr", { mode: "number" }).notNull().default(0),
+  discountPercent: integer("discount_percent", { mode: "number" }).notNull().default(0),
+  discountActive: integer("discount_active", { mode: "boolean" }).notNull().default(false),
   detail: text("detail"),
   icon: text("icon"),
   featured: integer("featured", { mode: "boolean" }).notNull().default(false),
