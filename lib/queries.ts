@@ -2,6 +2,7 @@ import { desc, eq } from "drizzle-orm";
 
 import { getDb } from "./db";
 import { packages, posts, settings } from "@/drizzle/schema";
+import { computeFinalPrice, isDiscountActive } from "@/utils/pricing";
 
 function logQueryError(message: string, error: unknown) {
   if (process.env.NODE_ENV !== "production") {
@@ -146,11 +147,17 @@ export async function getPostBySlug(slug: string): Promise<PublishedPost | null>
 export type PackageWithFeatures = {
   id: string;
   name: string;
-  price: number;
+  priceOriginalIdr: number;
+  discountPercent: number;
+  discountActive: boolean;
   detail: string | null;
   icon: string | null;
   featured: boolean;
   features: string[];
+  computed: {
+    isDiscountActive: boolean;
+    priceFinalIdr: number;
+  };
 };
 
 export async function getPackages(): Promise<PackageWithFeatures[]> {
@@ -164,6 +171,9 @@ export async function getPackages(): Promise<PackageWithFeatures[]> {
         id: packages.id,
         name: packages.name,
         price: packages.price,
+        priceOriginalIdr: packages.priceOriginalIdr,
+        discountPercent: packages.discountPercent,
+        discountActive: packages.discountActive,
         detail: packages.detail,
         icon: packages.icon,
         featured: packages.featured,
@@ -172,11 +182,7 @@ export async function getPackages(): Promise<PackageWithFeatures[]> {
       .from(packages)
       .orderBy(desc(packages.featured), desc(packages.createdAt));
 
-    return rows.map((row) => ({
-      ...row,
-      featured: !!row.featured,
-      features: parseFeatures(row.features),
-    }));
+    return rows.map((row) => mapPackageRow(row));
   } catch (error) {
     logQueryError("getPackages failed", error);
     return [];
@@ -206,6 +212,9 @@ export async function getPackageById(id: string): Promise<PackageWithFeatures | 
       id: packages.id,
       name: packages.name,
       price: packages.price,
+      priceOriginalIdr: packages.priceOriginalIdr,
+      discountPercent: packages.discountPercent,
+      discountActive: packages.discountActive,
       detail: packages.detail,
       icon: packages.icon,
       featured: packages.featured,
@@ -217,9 +226,44 @@ export async function getPackageById(id: string): Promise<PackageWithFeatures | 
 
   if (!row) return null;
 
+  return mapPackageRow(row);
+}
+
+type PackageRow = {
+  id: string;
+  name: string;
+  price: number;
+  priceOriginalIdr: number | null;
+  discountPercent: number | null;
+  discountActive: boolean | null;
+  detail: string | null;
+  icon: string | null;
+  featured: boolean | null;
+  features: string | null;
+};
+
+function mapPackageRow(row: PackageRow): PackageWithFeatures {
+  const priceOriginal = row.priceOriginalIdr ?? row.price ?? 0;
+  const discountPercent = row.discountPercent ?? 0;
+  const active = isDiscountActive({
+    discountPercent,
+    discountActive: row.discountActive ?? undefined,
+  });
+  const priceFinal = active ? computeFinalPrice(priceOriginal, discountPercent) : priceOriginal;
+
   return {
-    ...row,
+    id: row.id,
+    name: row.name,
+    priceOriginalIdr: priceOriginal,
+    discountPercent,
+    discountActive: !!row.discountActive,
+    detail: row.detail,
+    icon: row.icon,
     featured: !!row.featured,
     features: parseFeatures(row.features),
+    computed: {
+      isDiscountActive: active,
+      priceFinalIdr: priceFinal,
+    },
   };
 }

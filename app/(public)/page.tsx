@@ -1,13 +1,9 @@
 import Link from "next/link";
 import { getPackages, getPublishedPosts, getSiteSettings } from "@/lib/queries";
 import { Navbar } from "@/components/navbar";
+import { formatIDR } from "@/utils/pricing";
 
 export const revalidate = 0;
-
-function formatCurrency(value: number, currency: string) {
-  const formatter = new Intl.NumberFormat("id-ID");
-  return `${currency} ${formatter.format(value)}`.trim();
-}
 
 function formatDate(value: string) {
   try {
@@ -29,7 +25,9 @@ export default async function HomePage() {
     getPackages(),
   ]);
 
-  const sortedPackageList = [...packageList].sort((a, b) => a.price - b.price);
+  const sortedPackageList = [...packageList].sort(
+    (a, b) => a.computed.priceFinalIdr - b.computed.priceFinalIdr
+  );
 
   const baseWhatsappMessage = siteSettings.whatsappMessage?.trim() || "Halo, saya tertarik dengan layanan Anda";
 
@@ -42,7 +40,11 @@ export default async function HomePage() {
       return "#";
     }
 
-    const packageInfo = [`Saya tertarik dengan paket ${pkg.name} (${formatCurrency(pkg.price, siteSettings.currency)})`];
+    const priceLabel = pkg.computed.isDiscountActive
+      ? `${formatIDR(pkg.computed.priceFinalIdr)} (hemat ${pkg.discountPercent}% dari ${formatIDR(pkg.priceOriginalIdr)})`
+      : formatIDR(pkg.priceOriginalIdr);
+
+    const packageInfo = [`Saya tertarik dengan paket ${pkg.name} (${priceLabel})`];
     if (pkg.detail) {
       packageInfo.push(`Detail: ${pkg.detail}`);
     }
@@ -81,7 +83,24 @@ export default async function HomePage() {
             <div key={pkg.id} className={`pricing-card ${pkg.featured ? "featured" : ""}`}>
               <div className="card-icon">{pkg.icon || "💼"}</div>
               <h3>{pkg.name}</h3>
-              <p className="price">{formatCurrency(pkg.price, siteSettings.currency)}</p>
+              <div className="price-block">
+                {pkg.computed.isDiscountActive && (
+                  <div className="price-meta">
+                    <span className="price-original">{formatIDR(pkg.priceOriginalIdr)}</span>
+                    <span className="discount-badge">-{pkg.discountPercent}%</span>
+                  </div>
+                )}
+                <div
+                  className="price price-current"
+                  aria-label={
+                    pkg.computed.isDiscountActive
+                      ? `Harga setelah diskon ${pkg.discountPercent} persen`
+                      : undefined
+                  }
+                >
+                  {formatIDR(pkg.computed.priceFinalIdr)}
+                </div>
+              </div>
               {pkg.detail && <p style={{ color: "#666", minHeight: "48px" }}>{pkg.detail}</p>}
               {pkg.features.length > 0 && (
                 <ul className="feature-list">
@@ -97,7 +116,9 @@ export default async function HomePage() {
                 rel={siteSettings.whatsappNumber ? "noopener noreferrer" : undefined}
                 aria-disabled={siteSettings.whatsappNumber ? undefined : true}
               >
-                Pesan Paket via WhatsApp
+                {pkg.computed.isDiscountActive
+                  ? `Pesan Sekarang (Hemat ${pkg.discountPercent}%)`
+                  : "Pesan Paket via WhatsApp"}
               </a>
             </div>
           ))}

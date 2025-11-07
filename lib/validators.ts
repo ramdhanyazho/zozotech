@@ -12,7 +12,14 @@ export const postInputSchema = z.object({
 
 export const packageInputSchema = z.object({
   name: z.string().min(2),
-  price: z.number().int().nonnegative(),
+  priceOriginalIdr: z.number().int().nonnegative(),
+  discountPercent: z
+    .number()
+    .int()
+    .min(0)
+    .max(100)
+    .default(0),
+  discountActive: z.boolean().default(false),
   detail: z.string().optional().nullable(),
   icon: z.string().max(8).optional().nullable(),
   featured: z.boolean().optional().default(false),
