@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type MouseEvent } from "react";
 
@@ -63,9 +64,9 @@ export function Navbar({ siteName, logoUrl }: NavbarProps) {
   return (
     <nav id="navbar">
       <div className="nav-container">
-        <div className="logo" id="logo">
+        <Link href="/" className="logo" id="logo">
           <img src={logoUrl || "/logo-zozotech.svg"} alt={siteName} height={60} />
-        </div>
+        </Link>
 
         <button
           type="button"
