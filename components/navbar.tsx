@@ -24,6 +24,11 @@ export function Navbar({ siteName, logoUrl }: NavbarProps) {
   );
   const pathname = usePathname();
   const isHomePage = pathname === "/";
+  const isGalleryActive = pathname.startsWith("/galeri");
+
+  function closeMenu() {
+    setIsMenuOpen(false);
+  }
 
   useEffect(() => {
     function handleResize() {
@@ -58,7 +63,7 @@ export function Navbar({ siteName, logoUrl }: NavbarProps) {
         setActiveSection(href);
       }
     }
-    setIsMenuOpen(false);
+    closeMenu();
   }
 
   return (
@@ -85,7 +90,7 @@ export function Navbar({ siteName, logoUrl }: NavbarProps) {
             const linkHref = !isHomePage && href.startsWith("#") ? `/${href}` : href;
 
             return (
-            <li key={href}>
+              <li key={href}>
               <a
                 href={linkHref}
                 className={
@@ -100,6 +105,51 @@ export function Navbar({ siteName, logoUrl }: NavbarProps) {
             </li>
             );
           })}
+          <li className="nav-gallery-item">
+            <div className="dropdown-desktop">
+              <Link
+                href="/galeri"
+                className={`dropdown-toggle${isGalleryActive ? " active" : ""}`}
+                onClick={closeMenu}
+              >
+                Galeri Aplikasi
+                <svg width="14" height="14" viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M5 7l5 6 5-6H5z" fill="currentColor" />
+                </svg>
+              </Link>
+              <div className="dropdown-menu">
+                <Link href="/galeri" onClick={closeMenu}>
+                  Lihat Semua Galeri
+                </Link>
+                <div className="dropdown-divider" />
+                <Link href="/galeri/open-retail" onClick={closeMenu}>
+                  Open Retail (PC)
+                </Link>
+                <Link href="/galeri/eco-pos" onClick={closeMenu}>
+                  Eco POS (Android)
+                </Link>
+              </div>
+            </div>
+            <details className="dropdown-mobile">
+              <summary className={isGalleryActive ? "active" : undefined}>
+                <span>Galeri Aplikasi</span>
+                <svg width="14" height="14" viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M5 7l5 6 5-6H5z" fill="currentColor" />
+                </svg>
+              </summary>
+              <div className="dropdown-mobile-menu">
+                <Link href="/galeri" onClick={closeMenu}>
+                  Lihat Semua Galeri
+                </Link>
+                <Link href="/galeri/open-retail" onClick={closeMenu}>
+                  Open Retail (PC)
+                </Link>
+                <Link href="/galeri/eco-pos" onClick={closeMenu}>
+                  Eco POS (Android)
+                </Link>
+              </div>
+            </details>
+          </li>
         </ul>
       </div>
     </nav>
