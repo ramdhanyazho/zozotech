@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 
 interface NavbarProps {
   siteName: string;
+  logoUrl: string;
 }
 
 const NAV_ITEMS = [
@@ -15,8 +15,11 @@ const NAV_ITEMS = [
   { href: "#contact", label: "Kontak" },
 ];
 
-export function Navbar({ siteName }: NavbarProps) {
+export function Navbar({ siteName, logoUrl }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState(
+    NAV_ITEMS.find((item) => item.isDefaultActive)?.href ?? NAV_ITEMS[0]?.href ?? ""
+  );
 
   useEffect(() => {
     function handleResize() {
@@ -29,18 +32,36 @@ export function Navbar({ siteName }: NavbarProps) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  useEffect(() => {
+    function syncActiveSection() {
+      if (window.location.hash) {
+        setActiveSection(window.location.hash);
+      }
+    }
+
+    syncActiveSection();
+    window.addEventListener("hashchange", syncActiveSection);
+    return () => window.removeEventListener("hashchange", syncActiveSection);
+  }, []);
+
+  function handleNavClick(event: MouseEvent<HTMLAnchorElement>, href: string) {
+    if (href.startsWith("#")) {
+      event.preventDefault();
+      const targetId = href.slice(1);
+      const target = document.getElementById(targetId);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+        setActiveSection(href);
+      }
+    }
+    setIsMenuOpen(false);
+  }
+
   return (
     <nav id="navbar">
       <div className="nav-container">
         <div className="logo" id="logo">
-          <Image
-            src="/logo-zozotech.svg"
-            alt={siteName}
-            width={140}
-            height={140}
-            sizes="140px"
-            priority
-          />
+          <img src={logoUrl || "/logo-zozotech.svg"} alt={siteName} height={48} />
         </div>
 
         <button
@@ -60,8 +81,8 @@ export function Navbar({ siteName }: NavbarProps) {
             <li key={href}>
               <a
                 href={href}
-                className={isDefaultActive ? "active" : undefined}
-                onClick={() => setIsMenuOpen(false)}
+                className={activeSection === href || (isDefaultActive && !activeSection) ? "active" : undefined}
+                onClick={(event) => handleNavClick(event, href)}
               >
                 {label}
               </a>

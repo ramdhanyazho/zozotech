@@ -29,15 +29,32 @@ export default async function HomePage() {
     getPackages(),
   ]);
 
+  const baseWhatsappMessage = siteSettings.whatsappMessage?.trim() || "Halo, saya tertarik dengan layanan Anda";
+
   const whatsappUrl = siteSettings.whatsappNumber
-    ? `https://wa.me/${siteSettings.whatsappNumber}?text=${encodeURIComponent(
-        siteSettings.whatsappMessage || "Halo, saya tertarik dengan layanan Anda"
-      )}`
+    ? `https://wa.me/${siteSettings.whatsappNumber}?text=${encodeURIComponent(baseWhatsappMessage)}`
     : "#";
+
+  function getPackageWhatsappUrl(pkg: (typeof packageList)[number]) {
+    if (!siteSettings.whatsappNumber) {
+      return "#";
+    }
+
+    const packageInfo = [`Saya tertarik dengan paket ${pkg.name} (${formatCurrency(pkg.price, siteSettings.currency)})`];
+    if (pkg.detail) {
+      packageInfo.push(`Detail: ${pkg.detail}`);
+    }
+    if (pkg.features.length > 0) {
+      packageInfo.push(["Fitur paket:", ...pkg.features.map((feature) => `- ${feature}`)].join("\n"));
+    }
+
+    const message = [baseWhatsappMessage, "", ...packageInfo].join("\n").trim();
+    return `https://wa.me/${siteSettings.whatsappNumber}?text=${encodeURIComponent(message)}`;
+  }
 
   return (
     <>
-      <Navbar siteName={siteSettings.siteName} />
+      <Navbar siteName={siteSettings.siteName} logoUrl={siteSettings.navbarLogoUrl} />
 
       <div className="hero" id="beranda">
         <div className="hero-content">
@@ -71,6 +88,15 @@ export default async function HomePage() {
                   ))}
                 </ul>
               )}
+              <a
+                href={getPackageWhatsappUrl(pkg)}
+                className={`package-whatsapp-button${siteSettings.whatsappNumber ? "" : " disabled"}`}
+                target={siteSettings.whatsappNumber ? "_blank" : undefined}
+                rel={siteSettings.whatsappNumber ? "noopener noreferrer" : undefined}
+                aria-disabled={siteSettings.whatsappNumber ? undefined : true}
+              >
+                Pesan Paket via WhatsApp
+              </a>
             </div>
           ))}
         </div>
