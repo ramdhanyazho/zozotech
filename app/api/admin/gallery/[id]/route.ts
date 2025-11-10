@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 import { authAdmin } from "@/lib/auth";
 import { getDb } from "@/lib/db";
-import { galleryMedia, products } from "@/drizzle/schema";
+import { galleryMedia } from "@/drizzle/schema";
 import { deleteGalleryFiles } from "@/lib/uploader";
-
-const allowedSlugs = new Set(["open-retail", "eco-pos"]);
+import { ensureDefaultProduct, isDefaultProductSlug } from "@/lib/products";
 
 type RouteParams = Promise<{ id: string }>;
 
@@ -87,16 +86,11 @@ export async function PUT(req: NextRequest, { params }: { params: RouteParams })
 
   if (payload.product_slug !== undefined) {
     const slug = String(payload.product_slug).trim();
-    if (!allowedSlugs.has(slug)) {
+    if (!isDefaultProductSlug(slug)) {
       return NextResponse.json({ error: "invalid product_slug" }, { status: 400 });
     }
 
-    const [product] = await db
-      .select()
-      .from(products)
-      .where(and(eq(products.slug, slug), eq(products.isPublished, true)))
-      .limit(1);
-
+    const product = await ensureDefaultProduct(db, slug);
     if (!product) {
       return NextResponse.json({ error: "product not found" }, { status: 404 });
     }

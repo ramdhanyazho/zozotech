@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { and, asc, desc, eq } from "drizzle-orm";
 
-import { galleryMedia, products } from "@/drizzle/schema";
+import { galleryMedia } from "@/drizzle/schema";
 import { authAdmin } from "@/lib/auth";
 import { getDb } from "@/lib/db";
-
-const allowedSlugs = new Set(["open-retail", "eco-pos"]);
+import { ensureDefaultProduct, isDefaultProductSlug } from "@/lib/products";
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
   const slug = searchParams.get("product");
   const isAdminRequest = searchParams.get("admin") === "1";
 
-  if (!slug || !allowedSlugs.has(slug)) {
+  if (!slug || !isDefaultProductSlug(slug)) {
     return NextResponse.json({ error: "invalid product" }, { status: 400 });
   }
 
@@ -24,8 +23,7 @@ export async function GET(req: NextRequest) {
   }
 
   const db = getDb();
-  const [product] = await db.select().from(products).where(eq(products.slug, slug)).limit(1);
-
+  const product = await ensureDefaultProduct(db, slug);
   if (!product) {
     return NextResponse.json({ error: "not found" }, { status: 404 });
   }
