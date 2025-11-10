@@ -3,10 +3,9 @@ import { eq } from "drizzle-orm";
 
 import { authAdmin } from "@/lib/auth";
 import { getDb } from "@/lib/db";
-import { galleryMedia, products } from "@/drizzle/schema";
+import { galleryMedia } from "@/drizzle/schema";
 import { saveImagesForSlug } from "@/lib/uploader";
-
-const allowedSlugs = new Set(["open-retail", "eco-pos"]);
+import { ensureDefaultProduct, isDefaultProductSlug } from "@/lib/products";
 
 function normalizeString(value: FormDataEntryValue | null) {
   if (value === null || value === undefined) return null;
@@ -37,13 +36,12 @@ export async function POST(req: NextRequest) {
   const form = await req.formData();
   const slug = String(form.get("product_slug") ?? "").trim();
 
-  if (!allowedSlugs.has(slug)) {
+  if (!isDefaultProductSlug(slug)) {
     return NextResponse.json({ error: "invalid slug" }, { status: 400 });
   }
 
   const db = getDb();
-  const [product] = await db.select().from(products).where(eq(products.slug, slug)).limit(1);
-
+  const product = await ensureDefaultProduct(db, slug);
   if (!product) {
     return NextResponse.json({ error: "product not found" }, { status: 404 });
   }
