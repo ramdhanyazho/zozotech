@@ -113,12 +113,16 @@ export async function POST(req: Request) {
         const payloadData = parseClientPayload(tokenPayload);
         const slug = normalizeGallerySlug(extractSlugFromPayload(payloadData));
 
+        const blobWithSize = blob as UploadCompletedEvent["payload"]["blob"] & {
+          size?: number;
+        };
+
         await db.insert(gallery).values({
           slug,
           url: blob.url,
           key: blob.pathname,
           contentType: blob.contentType ?? null,
-          size: blob.size ?? 0,
+          size: typeof blobWithSize.size === "number" ? blobWithSize.size : 0,
         });
       },
     });

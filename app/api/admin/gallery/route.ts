@@ -5,7 +5,7 @@ import { gallery } from "@/drizzle/schema";
 import { authAdmin } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import {
-  GALLERY_CACHE_CONTROL,
+  GALLERY_CACHE_MAX_AGE_SECONDS,
   buildGalleryBlobKey,
   normalizeGallerySlug,
   sanitizeGalleryFileName,
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
 
         const blob = await put(key, file, {
           access: "public",
-          cacheControl: GALLERY_CACHE_CONTROL,
+          cacheControlMaxAge: GALLERY_CACHE_MAX_AGE_SECONDS,
         });
 
         await db.insert(gallery).values({
