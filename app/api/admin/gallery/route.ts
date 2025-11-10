@@ -38,6 +38,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "No files provided" }, { status: 400 });
   }
 
+  if (!process.env.UPLOAD_READ_WRITE_TOKEN) {
+    return NextResponse.json(
+      { error: "Blob token is not configured" },
+      { status: 500 }
+    );
+  }
+
   const db = getDb();
 
   try {
@@ -49,6 +56,7 @@ export async function POST(req: Request) {
         const blob = await put(key, file, {
           access: "public",
           cacheControlMaxAge: GALLERY_CACHE_MAX_AGE_SECONDS,
+          token: process.env.UPLOAD_READ_WRITE_TOKEN,
         });
 
         await db.insert(gallery).values({
