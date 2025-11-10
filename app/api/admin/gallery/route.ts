@@ -1,106 +1,77 @@
-import { NextRequest, NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { NextResponse } from "next/server";
+import { put } from "@vercel/blob";
 
+import { gallery } from "@/drizzle/schema";
 import { authAdmin } from "@/lib/auth";
 import { getDb } from "@/lib/db";
-import { galleryMedia } from "@/drizzle/schema";
-import { saveImagesForSlug } from "@/lib/uploader";
-import { ensureDefaultProduct, isDefaultProductSlug } from "@/lib/products";
+import {
+  GALLERY_CACHE_CONTROL,
+  buildGalleryBlobKey,
+  normalizeGallerySlug,
+  sanitizeGalleryFileName,
+} from "@/lib/gallery";
 
-function normalizeString(value: FormDataEntryValue | null) {
-  if (value === null || value === undefined) return null;
-  const text = String(value).trim();
-  return text.length > 0 ? text : null;
-}
+export const runtime = "nodejs";
 
-function parseBoolean(value: FormDataEntryValue | null, defaultValue: boolean) {
-  if (value === null || value === undefined || value === "") {
-    return defaultValue;
-  }
-  const normalized = String(value).toLowerCase();
-  return ["1", "true", "on", "yes"].includes(normalized);
-}
-
-function parseNumber(value: FormDataEntryValue | null, fallback = 0) {
-  if (value === null || value === undefined || value === "") return fallback;
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
-}
-
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   const admin = await authAdmin();
   if (!admin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const form = await req.formData();
-  const slug = String(form.get("product_slug") ?? "").trim();
+  const contentType = req.headers.get("content-type") ?? "";
+  if (!contentType.includes("multipart/form-data")) {
+    return NextResponse.json(
+      { error: "Content-Type must be multipart/form-data" },
+      { status: 400 }
+    );
+  }
 
-  if (!isDefaultProductSlug(slug)) {
-    return NextResponse.json({ error: "invalid slug" }, { status: 400 });
+  const form = await req.formData();
+  const slugValue = form.get("slug") ?? form.get("product_slug");
+  const slug = normalizeGallerySlug(slugValue);
+
+  const files = Array.from(form.getAll("files"))
+    .filter((entry): entry is File => entry instanceof File);
+
+  if (files.length === 0) {
+    return NextResponse.json({ error: "No files provided" }, { status: 400 });
   }
 
   const db = getDb();
-  const product = await ensureDefaultProduct(db, slug);
-  if (!product) {
-    return NextResponse.json({ error: "product not found" }, { status: 404 });
-  }
 
-  const files = form
-    .getAll("files")
-    .filter((item): item is File => item instanceof File);
-
-  if (files.length === 0) {
-    return NextResponse.json({ error: "no files" }, { status: 400 });
-  }
-
-  let saved;
   try {
-    saved = await saveImagesForSlug(slug, files);
+    const uploads = await Promise.all(
+      files.map(async (file) => {
+        const safeFileName = sanitizeGalleryFileName(file.name);
+        const key = buildGalleryBlobKey(slug, safeFileName);
+
+        const blob = await put(key, file, {
+          access: "public",
+          cacheControl: GALLERY_CACHE_CONTROL,
+        });
+
+        await db.insert(gallery).values({
+          slug,
+          url: blob.url,
+          key: blob.pathname,
+          contentType: file.type || null,
+          size: file.size,
+        });
+
+        return {
+          slug,
+          url: blob.url,
+          pathname: blob.pathname,
+          size: file.size,
+          contentType: file.type || null,
+        };
+      })
+    );
+
+    return NextResponse.json({ ok: true, uploads });
   } catch (error) {
     console.error("Failed to process gallery uploads", error);
-    return NextResponse.json({ error: "failed to process images" }, { status: 400 });
+    return NextResponse.json({ ok: false, error: "Upload failed" }, { status: 500 });
   }
-
-  const title = normalizeString(form.get("title"));
-  const caption = normalizeString(form.get("caption"));
-  const alt = normalizeString(form.get("alt"));
-  const sortOrder = parseNumber(form.get("sort_order"), 0);
-  const isCover = parseBoolean(form.get("is_cover"), false);
-  const isPublished = parseBoolean(form.get("is_published"), true);
-
-  const insertedIds: number[] = [];
-
-  for (const file of saved) {
-    const [record] = await db
-      .insert(galleryMedia)
-      .values({
-        productId: product.id,
-        slug,
-        title,
-        caption,
-        alt,
-        imageUrl: file.imageUrl,
-        thumbUrl: file.thumbUrl,
-        sortOrder,
-        isCover,
-        isPublished,
-      })
-      .returning({ id: galleryMedia.id });
-
-    if (record?.id) {
-      insertedIds.push(record.id);
-    }
-  }
-
-  if (isCover && insertedIds.length > 0) {
-    const lastInsertedId = insertedIds[insertedIds.length - 1];
-    await db.update(galleryMedia).set({ isCover: false }).where(eq(galleryMedia.productId, product.id));
-    await db
-      .update(galleryMedia)
-      .set({ isCover: true })
-      .where(eq(galleryMedia.id, lastInsertedId));
-  }
-
-  return NextResponse.json({ ok: true, inserted: insertedIds });
 }

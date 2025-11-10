@@ -86,3 +86,19 @@ export const galleryMedia = sqliteTable(
     orderIdx: index("idx_gallery_order").on(t.sortOrder),
   })
 );
+
+export const gallery = sqliteTable(
+  "gallery",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    slug: text("slug").notNull(),
+    url: text("url").notNull(),
+    key: text("key").notNull(),
+    contentType: text("content_type"),
+    size: integer("size", { mode: "number" }).notNull().default(0),
+    createdAt: integer("created_at").notNull().default(sql`(unixepoch())`),
+  },
+  (t) => ({
+    slugIdx: index("idx_gallery_v2_slug").on(t.slug),
+  })
+);
