@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { and, asc, desc, eq } from "drizzle-orm";
 
-import { galleryMedia } from "@/drizzle/schema";
+import { gallery, galleryMedia } from "@/drizzle/schema";
 import { authAdmin } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { ensureDefaultProduct, isDefaultProductSlug } from "@/lib/products";
+
+function now() {
+  return Math.floor(Date.now() / 1000);
+}
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -35,11 +39,52 @@ export async function GET(req: NextRequest) {
 
   const whereClause = conditions.length === 1 ? conditions[0] : and(...conditions);
 
-  const items = await db
+  let items = await db
     .select()
     .from(galleryMedia)
     .where(whereClause)
     .orderBy(desc(galleryMedia.isCover), asc(galleryMedia.sortOrder), desc(galleryMedia.createdAt));
+
+  if (items.length === 0) {
+    const [anyMedia] = await db
+      .select({ id: galleryMedia.id })
+      .from(galleryMedia)
+      .where(eq(galleryMedia.productId, product.id))
+      .limit(1);
+
+    if (!anyMedia) {
+      const legacyEntries = await db
+        .select()
+        .from(gallery)
+        .where(eq(gallery.slug, slug))
+        .orderBy(asc(gallery.createdAt));
+
+      if (legacyEntries.length > 0) {
+        await db.insert(galleryMedia).values(
+          legacyEntries.map((entry, index) => ({
+            productId: product.id,
+            slug,
+            title: null,
+            caption: null,
+            alt: null,
+            imageUrl: entry.url,
+            thumbUrl: entry.url,
+            sortOrder: index * 10,
+            isCover: index === 0,
+            isPublished: true,
+            createdAt: entry.createdAt ?? now(),
+            updatedAt: now(),
+          }))
+        );
+
+        items = await db
+          .select()
+          .from(galleryMedia)
+          .where(whereClause)
+          .orderBy(desc(galleryMedia.isCover), asc(galleryMedia.sortOrder), desc(galleryMedia.createdAt));
+      }
+    }
+  }
 
   return NextResponse.json({
     product: {
