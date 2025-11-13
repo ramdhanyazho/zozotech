@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 
 import { authAdmin } from "@/lib/auth";
 import { getDb } from "@/lib/db";
-import { galleryMedia } from "@/drizzle/schema";
+import { gallery, galleryMedia } from "@/drizzle/schema";
 import { deleteGalleryFiles } from "@/lib/uploader";
 import { ensureDefaultProduct, isDefaultProductSlug } from "@/lib/products";
 
@@ -145,6 +145,7 @@ export async function DELETE(req: NextRequest, { params }: { params: RouteParams
   }
 
   await db.delete(galleryMedia).where(eq(galleryMedia.id, id));
+  await db.delete(gallery).where(eq(gallery.url, existing.imageUrl));
   await deleteGalleryFiles({ imageUrl: existing.imageUrl, thumbUrl: existing.thumbUrl });
 
   return NextResponse.json({ ok: true });

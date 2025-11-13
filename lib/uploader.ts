@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 import sharp from "sharp";
+import { del } from "@vercel/blob";
 
 const MAX_UPLOAD_SIZE = 5 * 1024 * 1024;
 const ALLOWED_MIME_TYPES = new Set([
@@ -87,8 +88,26 @@ export async function deleteGalleryFiles(paths: { imageUrl?: string | null; thum
   if (entries.length === 0) return;
 
   await Promise.all(
-    entries.map(async (relativePath) => {
-      const cleaned = relativePath.startsWith("/") ? relativePath.slice(1) : relativePath;
+    entries.map(async (input) => {
+      const value = input.trim();
+      if (!value) return;
+
+      // Prefer deleting from Vercel Blob when a remote URL is provided
+      if (value.startsWith("http://") || value.startsWith("https://")) {
+        if (!process.env.UPLOAD_READ_WRITE_TOKEN) {
+          console.warn("UPLOAD_READ_WRITE_TOKEN is not set; skipping blob deletion for", value);
+          return;
+        }
+
+        try {
+          await del(value, { token: process.env.UPLOAD_READ_WRITE_TOKEN });
+        } catch (error) {
+          console.error("Failed to delete gallery blob", error);
+        }
+        return;
+      }
+
+      const cleaned = value.startsWith("/") ? value.slice(1) : value;
       const fullPath = path.join(process.cwd(), "public", cleaned);
       try {
         await fs.unlink(fullPath);
