@@ -19,11 +19,11 @@ type GalleryResponse = {
   }[];
 };
 
-function resolveBaseUrl() {
+async function resolveBaseUrl() {
   if (typeof window !== "undefined") {
     return "";
   }
-  const headerList = headers();
+  const headerList = await headers();
   const forwardedProto = headerList.get("x-forwarded-proto");
   const forwardedHost = headerList.get("x-forwarded-host");
   const host = headerList.get("host");
@@ -42,7 +42,7 @@ function resolveBaseUrl() {
 }
 
 async function fetchGallery(slug: ProductSlug): Promise<GalleryResponse> {
-  const baseUrl = resolveBaseUrl();
+  const baseUrl = await resolveBaseUrl();
   const searchParams = new URLSearchParams({ product: slug });
   const response = await fetch(`${baseUrl}/api/gallery?${searchParams.toString()}`, {
     cache: "no-store",
