@@ -134,10 +134,6 @@ export default async function HomePage() {
 
         <div className="features-grid">
           <div className="feature-item">
-            <h3>🎨 Desain Modern</h3>
-            <p>UI/UX menarik dan responsif di semua perangkat</p>
-          </div>
-          <div className="feature-item">
             <h3>⚡ Performa Cepat</h3>
             <p>Website dioptimasi untuk kecepatan maksimal</p>
           </div>
