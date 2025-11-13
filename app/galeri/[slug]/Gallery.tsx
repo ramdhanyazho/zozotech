@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { GalleryGrid } from "./GalleryGrid";
@@ -21,6 +22,15 @@ type GalleryResponse = {
 function resolveBaseUrl() {
   if (typeof window !== "undefined") {
     return "";
+  }
+  const headerList = headers();
+  const forwardedProto = headerList.get("x-forwarded-proto");
+  const forwardedHost = headerList.get("x-forwarded-host");
+  const host = headerList.get("host");
+
+  if (forwardedHost ?? host) {
+    const protocol = forwardedProto ?? (process.env.NODE_ENV === "development" ? "http" : "https");
+    return `${protocol}://${(forwardedHost ?? host)?.replace(/\/$/, "")}`;
   }
   if (process.env.NEXT_PUBLIC_BASE_URL) {
     return process.env.NEXT_PUBLIC_BASE_URL.replace(/\/$/, "");
