@@ -26,8 +26,9 @@ export function GalleryGrid({ productName, items }: GalleryGridProps) {
       <section
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-          gap: "24px",
+          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          gap: "20px",
+          justifyItems: "center",
         }}
       >
         {items.map((item) => {
@@ -43,6 +44,8 @@ export function GalleryGrid({ productName, items }: GalleryGridProps) {
                 background: "#fff",
                 display: "flex",
                 flexDirection: "column",
+                maxWidth: "320px",
+                width: "100%",
               }}
             >
               <button
@@ -60,7 +63,8 @@ export function GalleryGrid({ productName, items }: GalleryGridProps) {
                   alt={item.alt || item.title || productName}
                   width={800}
                   height={450}
-                  style={{ display: "block", width: "100%", height: "auto" }}
+                  sizes="(max-width: 768px) 100vw, 320px"
+                  style={{ display: "block", width: "100%", height: "200px", objectFit: "cover" }}
                 />
               </button>
               <div style={{ padding: "18px" }}>

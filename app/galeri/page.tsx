@@ -1,5 +1,8 @@
 import Link from "next/link";
 
+import { Navbar } from "@/components/navbar";
+import { getSiteSettings } from "@/lib/queries";
+
 import { Gallery } from "./[slug]/Gallery";
 
 export const metadata = {
@@ -8,8 +11,13 @@ export const metadata = {
 };
 
 export default async function GalleryLandingPage() {
+  const siteSettings = await getSiteSettings();
+
   return (
-    <main style={{ maxWidth: "1100px", margin: "0 auto", padding: "120px 20px 80px" }}>
+    <>
+      <Navbar siteName={siteSettings.siteName} logoUrl={siteSettings.navbarLogoUrl} />
+
+      <main style={{ maxWidth: "1100px", margin: "0 auto", padding: "140px 20px 80px" }}>
       <header style={{ textAlign: "center", marginBottom: "48px" }}>
         <p style={{ color: "#6366f1", fontWeight: 700, letterSpacing: "0.08em" }}>GALERI APLIKASI</p>
         <h1 style={{ fontSize: "2.5rem", margin: "12px 0", color: "#111827" }}>Kenali Produk Unggulan Kami</h1>
@@ -70,6 +78,7 @@ export default async function GalleryLandingPage() {
         <div style={{ height: "48px" }} />
         <Gallery slug="eco-pos" />
       </section>
-    </main>
+      </main>
+    </>
   );
 }
