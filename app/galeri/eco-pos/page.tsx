@@ -1,3 +1,6 @@
+import { Navbar } from "@/components/navbar";
+import { getSiteSettings } from "@/lib/queries";
+
 import { Gallery } from "../[slug]/Gallery";
 
 export const metadata = {
@@ -5,11 +8,16 @@ export const metadata = {
   description: "Cuplikan tampilan aplikasi kasir Eco POS (Android) dari Zozotech.",
 };
 
-export default function EcoPosGalleryPage() {
+export default async function EcoPosGalleryPage() {
+  const siteSettings = await getSiteSettings();
+
   return (
-    <main style={{ maxWidth: "1100px", margin: "0 auto", padding: "120px 20px 80px" }}>
-      <h1 style={{ fontSize: "2.5rem", marginBottom: "32px", color: "#111827" }}>Galeri Eco POS (Android)</h1>
-      <Gallery slug="eco-pos" />
-    </main>
+    <>
+      <Navbar siteName={siteSettings.siteName} logoUrl={siteSettings.navbarLogoUrl} />
+      <main style={{ maxWidth: "1100px", margin: "0 auto", padding: "140px 20px 80px" }}>
+        <h1 style={{ fontSize: "2.5rem", marginBottom: "32px", color: "#111827" }}>Galeri Eco POS (Android)</h1>
+        <Gallery slug="eco-pos" />
+      </main>
+    </>
   );
 }

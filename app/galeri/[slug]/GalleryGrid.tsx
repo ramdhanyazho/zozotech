@@ -96,22 +96,42 @@ export function GalleryGrid({ productName, items }: GalleryGridProps) {
         >
           <div
             style={{
-              maxWidth: "960px",
+              maxWidth: "min(90vw, 960px)",
               width: "100%",
               background: "#fff",
               borderRadius: "20px",
-              overflow: "hidden",
               boxShadow: "0 25px 60px rgba(15,23,42,0.25)",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
             }}
             onClick={(event) => event.stopPropagation()}
           >
-            <Image
-              src={activeItem.imageUrl}
-              alt={activeItem.alt || activeItem.title || productName}
-              width={1280}
-              height={720}
-              style={{ display: "block", width: "100%", height: "auto" }}
-            />
+            <div
+              style={{
+                width: "100%",
+                background: "#000",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "16px",
+              }}
+            >
+              <Image
+                src={activeItem.imageUrl}
+                alt={activeItem.alt || activeItem.title || productName}
+                width={1280}
+                height={720}
+                sizes="(max-width: 768px) 100vw, min(90vw, 960px)"
+                style={{
+                  display: "block",
+                  width: "100%",
+                  height: "auto",
+                  maxHeight: "80vh",
+                  objectFit: "contain",
+                }}
+              />
+            </div>
             <div style={{ padding: "16px", textAlign: "right" }}>
               <button
                 type="button"

@@ -50,6 +50,7 @@ export default function AdminGalleryPage() {
     try {
       const res = await fetch(`/api/gallery?admin=1&product=${currentSlug}`, {
         cache: "no-store",
+        credentials: "include",
       });
       if (!res.ok) {
         throw new Error(await res.text());
@@ -100,6 +101,7 @@ export default function AdminGalleryPage() {
       const res = await fetch("/api/admin/gallery", {
         method: "POST",
         body: formData,
+        credentials: "include",
       });
       if (!res.ok) {
         throw new Error(await res.text());
@@ -121,6 +123,7 @@ export default function AdminGalleryPage() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ is_published: nextValue }),
+        credentials: "include",
       });
       if (!res.ok) {
         throw new Error(await res.text());
@@ -138,6 +141,7 @@ export default function AdminGalleryPage() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ is_cover: true }),
+        credentials: "include",
       });
       if (!res.ok) {
         throw new Error(await res.text());
@@ -154,6 +158,7 @@ export default function AdminGalleryPage() {
     try {
       const res = await fetch(`/api/admin/gallery/${id}`, {
         method: "DELETE",
+        credentials: "include",
       });
       if (!res.ok) {
         throw new Error(await res.text());
@@ -191,6 +196,7 @@ export default function AdminGalleryPage() {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ sort_order: desiredOrder }),
+              credentials: "include",
             });
             if (!res.ok) {
               throw new Error(await res.text());
