@@ -158,6 +158,8 @@ export default function AdminGalleryPage() {
       if (!res.ok) {
         throw new Error(await res.text());
       }
+      setItems((current) => current.filter((item) => item.id !== id));
+      toast("Berhasil menghapus gambar");
       await loadItems(slug);
     } catch (error) {
       console.error(error);
