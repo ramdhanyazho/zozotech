@@ -33,7 +33,8 @@ function resolveBaseUrl() {
 
 async function fetchGallery(slug: ProductSlug): Promise<GalleryResponse> {
   const baseUrl = resolveBaseUrl();
-  const response = await fetch(`${baseUrl}/api/gallery?product=${slug}`, {
+  const searchParams = new URLSearchParams({ product: slug });
+  const response = await fetch(`${baseUrl}/api/gallery?${searchParams.toString()}`, {
     cache: "no-store",
   });
   if (!response.ok) {

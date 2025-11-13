@@ -12,10 +12,11 @@ function now() {
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
-  const slug = searchParams.get("product");
+  const rawSlug = searchParams.get("product") ?? searchParams.get("slug");
+  const normalizedSlug = rawSlug?.trim().toLowerCase() ?? "";
   const isAdminRequest = searchParams.get("admin") === "1";
 
-  if (!slug || !isDefaultProductSlug(slug)) {
+  if (!normalizedSlug || !isDefaultProductSlug(normalizedSlug)) {
     return NextResponse.json({ error: "invalid product" }, { status: 400 });
   }
 
@@ -27,7 +28,7 @@ export async function GET(req: NextRequest) {
   }
 
   const db = getDb();
-  const product = await ensureDefaultProduct(db, slug);
+  const product = await ensureDefaultProduct(db, normalizedSlug);
   if (!product) {
     return NextResponse.json({ error: "not found" }, { status: 404 });
   }
@@ -56,14 +57,14 @@ export async function GET(req: NextRequest) {
       const legacyEntries = await db
         .select()
         .from(gallery)
-        .where(eq(gallery.slug, slug))
+        .where(eq(gallery.slug, normalizedSlug))
         .orderBy(asc(gallery.createdAt));
 
       if (legacyEntries.length > 0) {
         await db.insert(galleryMedia).values(
           legacyEntries.map((entry, index) => ({
             productId: product.id,
-            slug,
+            slug: normalizedSlug,
             title: null,
             caption: null,
             alt: null,
