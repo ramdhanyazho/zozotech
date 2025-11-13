@@ -23,15 +23,17 @@ function resolveBlobHostname() {
 
 const blobHostname = resolveBlobHostname();
 
+const remotePatterns = [
+  { protocol: 'https', hostname: 'public.blob.vercel-storage.com' },
+  { protocol: 'https', hostname: '**.public.blob.vercel-storage.com' },
+  ...(blobHostname ? [{ protocol: 'https', hostname: blobHostname }] : [])
+];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  ...(blobHostname
-    ? {
-        images: {
-          remotePatterns: [{ protocol: 'https', hostname: blobHostname }]
-        }
-      }
-    : {}),
+  images: {
+    remotePatterns
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb'
