@@ -1406,8 +1406,17 @@ footer {
 .admin-main-area {
   flex: 1;
   min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.admin-main-content {
+  width: 100%;
   display: flex;
   flex-direction: column;
+  gap: 32px;
+  padding: 32px;
+  box-sizing: border-box;
 }
 
 .admin-sidebar {
@@ -1490,8 +1499,14 @@ footer {
 }
 
 .admin-main {
-  flex: 1;
-  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.admin-main > * {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .admin-sidebar-close {
@@ -1937,6 +1952,8 @@ footer {
   .admin-topbar {
     padding: 18px 24px;
     gap: 16px;
+    position: static;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
   }
 
   .admin-topbar-brand {
@@ -1969,8 +1986,10 @@ footer {
     transform: translateX(0);
   }
 
-  .admin-main {
+  .admin-main-content {
     padding: 24px;
+    gap: 28px;
+    padding-top: 20px;
   }
 
   .admin-shell.sidebar-collapsed .admin-sidebar {
@@ -2024,8 +2043,9 @@ footer {
     gap: 18px;
   }
 
-  .admin-main {
-    padding: 24px;
+  .admin-main-content {
+    padding: 20px;
+    gap: 24px;
   }
 }
 
@@ -2055,5 +2075,10 @@ footer {
   .dashboard-card,
   .dashboard-panel {
     padding: 24px;
+  }
+
+  .admin-main-content {
+    padding: 18px;
+    gap: 20px;
   }
 }
