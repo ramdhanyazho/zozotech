@@ -18,8 +18,34 @@ type GalleryGridProps = {
 };
 
 export function GalleryGrid({ productName, items }: GalleryGridProps) {
-  const [activeId, setActiveId] = useState<number | null>(null);
-  const activeItem = items.find((item) => item.id === activeId) ?? null;
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const activeItem = activeIndex === null ? null : items[activeIndex] ?? null;
+
+  const showPrevious = () => {
+    if (items.length === 0) {
+      return;
+    }
+    setActiveIndex((index) => {
+      if (index === null) {
+        return null;
+      }
+      const nextIndex = (index - 1 + items.length) % items.length;
+      return nextIndex;
+    });
+  };
+
+  const showNext = () => {
+    if (items.length === 0) {
+      return;
+    }
+    setActiveIndex((index) => {
+      if (index === null) {
+        return null;
+      }
+      const nextIndex = (index + 1) % items.length;
+      return nextIndex;
+    });
+  };
 
   return (
     <div>
@@ -31,7 +57,7 @@ export function GalleryGrid({ productName, items }: GalleryGridProps) {
           justifyItems: "center",
         }}
       >
-        {items.map((item) => {
+        {items.map((item, index) => {
           const label = item.title || productName;
           return (
             <article
@@ -50,7 +76,7 @@ export function GalleryGrid({ productName, items }: GalleryGridProps) {
             >
               <button
                 type="button"
-                onClick={() => setActiveId(item.id)}
+                onClick={() => setActiveIndex(index)}
                 style={{
                   padding: 0,
                   border: "none",
@@ -92,7 +118,7 @@ export function GalleryGrid({ productName, items }: GalleryGridProps) {
             padding: "24px",
             zIndex: 2000,
           }}
-          onClick={() => setActiveId(null)}
+          onClick={() => setActiveIndex(null)}
         >
           <div
             style={{
@@ -115,8 +141,33 @@ export function GalleryGrid({ productName, items }: GalleryGridProps) {
                 alignItems: "center",
                 justifyContent: "center",
                 padding: "16px",
+                position: "relative",
               }}
             >
+              <button
+                type="button"
+                onClick={showPrevious}
+                aria-label="Sebelumnya"
+                style={{
+                  position: "absolute",
+                  left: "16px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  borderRadius: "9999px",
+                  border: "1px solid rgba(255,255,255,0.4)",
+                  background: "rgba(15,23,42,0.6)",
+                  color: "#fff",
+                  width: "44px",
+                  height: "44px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  fontSize: "1.25rem",
+                }}
+              >
+                ‹
+              </button>
               <Image
                 src={activeItem.imageUrl}
                 alt={activeItem.alt || activeItem.title || productName}
@@ -131,11 +182,35 @@ export function GalleryGrid({ productName, items }: GalleryGridProps) {
                   objectFit: "contain",
                 }}
               />
+              <button
+                type="button"
+                onClick={showNext}
+                aria-label="Berikutnya"
+                style={{
+                  position: "absolute",
+                  right: "16px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  borderRadius: "9999px",
+                  border: "1px solid rgba(255,255,255,0.4)",
+                  background: "rgba(15,23,42,0.6)",
+                  color: "#fff",
+                  width: "44px",
+                  height: "44px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  fontSize: "1.25rem",
+                }}
+              >
+                ›
+              </button>
             </div>
             <div style={{ padding: "16px", textAlign: "right" }}>
               <button
                 type="button"
-                onClick={() => setActiveId(null)}
+                onClick={() => setActiveIndex(null)}
                 style={{
                   border: "1px solid #d1d5db",
                   borderRadius: "12px",
