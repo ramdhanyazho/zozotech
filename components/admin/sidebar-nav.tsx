@@ -18,11 +18,15 @@ export function AdminSidebarNav({ items }: { items: SidebarItem[] }) {
       {items.map((item) => {
         const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
         return (
-          <Link key={item.href} href={item.href} className={`admin-sidebar-link${isActive ? " active" : ""}`}>
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`admin-sidebar-link${isActive ? " active" : ""}`}
+          >
             <span className="sidebar-icon" aria-hidden="true">
               {item.icon}
             </span>
-            <span>{item.label}</span>
+            <span className="sidebar-label">{item.label}</span>
           </Link>
         );
       })}
