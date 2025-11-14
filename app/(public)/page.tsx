@@ -56,13 +56,6 @@ export default async function HomePage() {
     return `https://wa.me/${siteSettings.whatsappNumber}?text=${encodeURIComponent(message)}`;
   }
 
-  const stats = [
-    { value: "1.200+", label: "Klien aktif di seluruh Indonesia" },
-    { value: "5+", label: "Tahun pengalaman membangun solusi" },
-    { value: "99,9%", label: "Rata-rata uptime layanan cloud" },
-    { value: "24/7", label: "Dukungan teknis responsif" },
-  ];
-
   const serviceList = [
     {
       icon: "⚡",
@@ -147,19 +140,6 @@ export default async function HomePage() {
                 </a>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="stats-section">
-        <div className="stats-container">
-          <div className="stats-grid">
-            {stats.map((item, index) => (
-              <div key={item.label} className={`stat-card animate-on-load animate-delay-${(index % 4) + 1}`}>
-                <h3>{item.value}</h3>
-                <p>{item.label}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
