@@ -1398,9 +1398,11 @@ footer {
   box-shadow: 0 18px 40px rgba(239, 68, 68, 0.3);
 }
 
-.admin-dashboard {
+.admin-dashboard,
+.admin-layout {
   display: flex;
   min-height: 100vh;
+  width: 100%;
 }
 
 .admin-main-area {
@@ -1408,6 +1410,7 @@ footer {
   min-height: 100vh;
   display: grid;
   grid-template-rows: auto 1fr;
+  min-width: 0;
 }
 
 .admin-main-content {
@@ -1427,9 +1430,10 @@ footer {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  transition: width 0.3s ease, transform 0.3s ease;
+  transition: width 0.25s ease, padding 0.25s ease, transform 0.3s ease;
   position: relative;
   z-index: 30;
+  flex-shrink: 0;
 }
 
 .admin-sidebar::after {
@@ -1548,32 +1552,36 @@ footer {
   overflow: hidden;
 }
 
-.admin-shell.sidebar-collapsed .admin-sidebar {
+.admin-sidebar.sidebar-collapsed {
   width: 80px;
   padding: 32px 16px;
 }
 
-.admin-shell.sidebar-collapsed .admin-sidebar::after {
+.admin-sidebar.sidebar-collapsed::after {
   opacity: 0;
   visibility: hidden;
 }
 
-.admin-shell.sidebar-collapsed .admin-sidebar-title {
+.admin-sidebar.sidebar-collapsed .admin-sidebar-title {
   display: none;
 }
 
-.admin-shell.sidebar-collapsed .admin-sidebar-link {
+.admin-sidebar.sidebar-collapsed .admin-sidebar-link {
   justify-content: center;
+  padding: 12px;
+  gap: 0;
 }
 
-.admin-shell.sidebar-collapsed .sidebar-label {
-  opacity: 0;
-  visibility: hidden;
-  width: 0;
+.admin-sidebar.sidebar-collapsed .sidebar-label {
+  display: none;
 }
 
-.admin-shell.sidebar-collapsed .sidebar-icon {
+.admin-sidebar.sidebar-collapsed .sidebar-icon {
   transform: scale(1.05);
+}
+
+.admin-sidebar.sidebar-collapsed .admin-sidebar-nav {
+  gap: 20px;
 }
 
 .dashboard-wrapper {
@@ -1992,23 +2000,30 @@ footer {
     padding-top: 20px;
   }
 
-  .admin-shell.sidebar-collapsed .admin-sidebar {
+  .admin-sidebar.sidebar-collapsed {
     width: 260px;
+    padding: 32px 24px;
   }
 
-  .admin-shell.sidebar-collapsed .admin-sidebar-link {
+  .admin-sidebar.sidebar-collapsed .admin-sidebar-link {
     justify-content: flex-start;
+    gap: 14px;
   }
 
-  .admin-shell.sidebar-collapsed .sidebar-label,
-  .admin-shell.sidebar-collapsed .admin-sidebar-title {
+  .admin-sidebar.sidebar-collapsed .sidebar-label,
+  .admin-sidebar.sidebar-collapsed .admin-sidebar-title {
+    display: inline;
     opacity: 1;
     visibility: visible;
-    width: auto;
   }
 
-  .admin-shell.sidebar-collapsed .admin-sidebar-title {
+  .admin-sidebar.sidebar-collapsed .admin-sidebar-title {
     display: block;
+  }
+
+  .admin-sidebar.sidebar-collapsed::after {
+    opacity: 1;
+    visibility: visible;
   }
 }
 
