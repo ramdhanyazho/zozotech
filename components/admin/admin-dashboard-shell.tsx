@@ -73,21 +73,23 @@ export function AdminDashboardShell({
   const closeMobileSidebar = () => setIsMobileOpen(false);
 
   const shellClassName = useMemo(() => {
-    return [
-      "admin-shell",
-      isCollapsed ? "sidebar-collapsed" : "",
-      isMobileOpen ? "sidebar-open" : "",
-    ]
+    return ["admin-shell", isMobileOpen ? "sidebar-open" : ""].filter(
+      Boolean,
+    ).join(" ");
+  }, [isMobileOpen]);
+
+  const sidebarClassName = useMemo(() => {
+    return ["admin-sidebar", isCollapsed ? "sidebar-collapsed" : ""]
       .filter(Boolean)
       .join(" ");
-  }, [isCollapsed, isMobileOpen]);
+  }, [isCollapsed]);
 
   return (
     <div className={shellClassName}>
-      <div className="admin-dashboard">
+      <div className="admin-dashboard admin-layout">
         <aside
           id="admin-sidebar"
-          className="admin-sidebar"
+          className={sidebarClassName}
           aria-label="Navigasi admin"
         >
           <button
