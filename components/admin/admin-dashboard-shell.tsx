@@ -142,7 +142,9 @@ export function AdminDashboardShell({
             </details>
           </header>
 
-          <main className="admin-main">{children}</main>
+          <div className="admin-main-content">
+            <main className="admin-main">{children}</main>
+          </div>
         </div>
       </div>
 
