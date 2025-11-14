@@ -41,7 +41,16 @@ export function LoginForm() {
 
   return (
     <form className="login-card" onSubmit={handleSubmit}>
-      <h1>Masuk Admin</h1>
+      <div className="login-header">
+        <div className="login-logo" aria-hidden="true">
+          Z
+        </div>
+        <div>
+          <h1>Masuk ke Dashboard</h1>
+          <p>Akses panel admin dan kelola seluruh konten Anda.</p>
+        </div>
+      </div>
+
       <div className="field">
         <label htmlFor="email">Email</label>
         <input id="email" name="email" type="email" placeholder="admin@zozotech.local" required autoComplete="email" />
@@ -50,10 +59,19 @@ export function LoginForm() {
         <label htmlFor="password">Password</label>
         <input id="password" name="password" type="password" required autoComplete="current-password" />
       </div>
+
+      <div className="login-meta">
+        <span>Gunakan akun admin resmi.</span>
+        <a href="#">Lupa password?</a>
+      </div>
+
       {error && <p className="login-error">{error}</p>}
+
       <button type="submit" disabled={loading}>
         {loading ? "Memproses..." : "Masuk"}
       </button>
+
+      <p className="login-footer">Keamanan akun Anda dilindungi dengan enkripsi standar industri.</p>
     </form>
   );
 }

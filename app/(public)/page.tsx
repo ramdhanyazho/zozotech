@@ -56,101 +56,190 @@ export default async function HomePage() {
     return `https://wa.me/${siteSettings.whatsappNumber}?text=${encodeURIComponent(message)}`;
   }
 
+  const stats = [
+    { value: "1.200+", label: "Klien aktif di seluruh Indonesia" },
+    { value: "5+", label: "Tahun pengalaman membangun solusi" },
+    { value: "99,9%", label: "Rata-rata uptime layanan cloud" },
+    { value: "24/7", label: "Dukungan teknis responsif" },
+  ];
+
+  const serviceList = [
+    {
+      icon: "⚡",
+      title: "Implementasi Cepat",
+      description: "Onboarding singkat dengan migrasi data dan training lengkap untuk tim Anda.",
+    },
+    {
+      icon: "📊",
+      title: "Insight Real-time",
+      description: "Dashboard interaktif untuk memantau penjualan dan stok kapan pun dibutuhkan.",
+    },
+    {
+      icon: "🔒",
+      title: "Keamanan Terjamin",
+      description: "Standar keamanan modern dengan backup otomatis dan akses terkontrol.",
+    },
+    {
+      icon: "💡",
+      title: "Kustom Sesuai Bisnis",
+      description: "Integrasi fitur dan workflow yang fleksibel sesuai cara kerja bisnis Anda.",
+    },
+  ];
+
+  const aboutHighlights = [
+    "Tim support lokal yang siap membantu kapan pun",
+    "Pembaruan fitur berkala tanpa biaya tambahan",
+    "Pendekatan konsultatif untuk setiap implementasi",
+  ];
+
+  const heroPoints = [
+    "Sinkronisasi stok & transaksi otomatis",
+    "Laporan penjualan lengkap dalam hitungan detik",
+    "Integrasi WhatsApp & marketplace siap pakai",
+  ];
+
+  const featuredPackage = sortedPackageList.find((pkg) => pkg.featured);
+
   return (
     <>
       <Navbar siteName={siteSettings.siteName} logoUrl={siteSettings.navbarLogoUrl} />
 
-      <div className="hero" id="beranda">
-        <div className="hero-content">
-          <h1>Solusi POS Kasir Terbaik untuk Bisnis Anda</h1>
-          <p>
-            Aplikasi kasir modern untuk PC &amp; Android dengan fitur lengkap dan support terpercaya
-          </p>
-          <a href="#service" className="cta-button">
-            Lihat Paket Kami
-          </a>
+      <section className="hero" id="beranda">
+        <div className="hero-inner">
+          <div className="hero-text animate-on-load">
+            <span className="hero-label">Sistem POS &amp; Web Profesional</span>
+            <h1>
+              Transformasi Digital untuk Bisnis yang Lebih Lincah
+            </h1>
+            <p>
+              Tingkatkan performa operasional bisnis dengan aplikasi kasir modern, laporan real-time, dan layanan pembuatan
+              website yang siap mendukung pertumbuhan Anda.
+            </p>
+            <div className="hero-actions">
+              <a href="#service" className="button-primary">
+                Mulai Sekarang
+              </a>
+              <Link href="/galeri" className="button-secondary">
+                Lihat Demo
+              </Link>
+            </div>
+            <div className="hero-meta">
+              <span>✨ Dipercaya ratusan UMKM &amp; enterprise</span>
+              <span>🛠️ Instalasi &amp; support profesional</span>
+            </div>
+          </div>
+          <div className="hero-visual animate-on-load animate-delay-2">
+            <div className="hero-orb" aria-hidden="true" />
+            <div className="hero-card">
+              <h3>Paket Unggulan</h3>
+              <p>Rekomendasi terbaik untuk memulai digitalisasi bisnis Anda.</p>
+              <ul className="hero-card-list">
+                {heroPoints.map((point, index) => (
+                  <li key={index}>
+                    <span>✓</span>
+                    {point}
+                  </li>
+                ))}
+              </ul>
+              <div className="hero-actions" style={{ marginTop: 12 }}>
+                <a href="#contact" className="button-secondary" style={{ paddingInline: 20 }}>
+                  Konsultasi Gratis
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
+
+      <section className="stats-section">
+        <div className="stats-container">
+          <div className="stats-grid">
+            {stats.map((item, index) => (
+              <div key={item.label} className={`stat-card animate-on-load animate-delay-${(index % 4) + 1}`}>
+                <h3>{item.value}</h3>
+                <p>{item.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <div className="container" id="service">
         <h2 className="section-title">Paket Aplikasi POS Kasir</h2>
-        <p className="section-subtitle">Pilih paket yang sesuai dengan kebutuhan bisnis Anda</p>
+        <p className="section-subtitle">Pilih paket yang sesuai dengan kebutuhan operasional bisnis Anda</p>
         <div className="pricing-grid">
           {sortedPackageList.length === 0 && (
             <p className="muted">Belum ada paket yang dipublikasikan.</p>
           )}
-          {sortedPackageList.map((pkg) => (
-            <div key={pkg.id} className={`pricing-card ${pkg.featured ? "featured" : ""}`}>
-              <div className="card-icon">{pkg.icon || "💼"}</div>
-              <h3>{pkg.name}</h3>
-              <div className="price-block">
-                {pkg.computed.isDiscountActive && (
-                  <div className="price-meta">
-                    <span className="price-original">{formatIDR(pkg.priceOriginalIdr)}</span>
-                    <span className="discount-badge">-{pkg.discountPercent}%</span>
+          {sortedPackageList.map((pkg) => {
+            const isFeatured = pkg.featured || pkg.id === featuredPackage?.id;
+            return (
+              <div key={pkg.id} className={`pricing-card animate-on-load ${isFeatured ? "featured" : ""}`}>
+                {isFeatured && <span className="pricing-card-badge">Paling Populer</span>}
+                <div className="card-icon" aria-hidden="true">
+                  {pkg.icon || "💼"}
+                </div>
+                <div>
+                  <h3>{pkg.name}</h3>
+                  <div className="pricing-price">
+                    {pkg.computed.isDiscountActive && (
+                      <div className="price-meta">
+                        <span className="price-original">{formatIDR(pkg.priceOriginalIdr)}</span>
+                        <span className="discount-badge">-{pkg.discountPercent}%</span>
+                      </div>
+                    )}
+                    <span className="price">{formatIDR(pkg.computed.priceFinalIdr)}</span>
                   </div>
+                  {pkg.detail && <p className="pricing-description">{pkg.detail}</p>}
+                </div>
+                {pkg.features.length > 0 && (
+                  <ul className="pricing-feature-list" aria-label={`Fitur paket ${pkg.name}`}>
+                    {pkg.features.map((feature, idx) => (
+                      <li key={idx}>{feature}</li>
+                    ))}
+                  </ul>
                 )}
-                <div
-                  className="price price-current"
-                  aria-label={
-                    pkg.computed.isDiscountActive
-                      ? `Harga setelah diskon ${pkg.discountPercent} persen`
-                      : undefined
-                  }
-                >
-                  {formatIDR(pkg.computed.priceFinalIdr)}
+                <div className="pricing-card-footer">
+                  <a
+                    href={getPackageWhatsappUrl(pkg)}
+                    className={`package-whatsapp-button${siteSettings.whatsappNumber ? "" : " disabled"}`}
+                    target={siteSettings.whatsappNumber ? "_blank" : undefined}
+                    rel={siteSettings.whatsappNumber ? "noopener noreferrer" : undefined}
+                    aria-disabled={siteSettings.whatsappNumber ? undefined : true}
+                  >
+                    {pkg.computed.isDiscountActive
+                      ? `Pesan Sekarang (Hemat ${pkg.discountPercent}%)`
+                      : "Pesan Paket via WhatsApp"}
+                  </a>
+                  <p className="pricing-note">Termasuk setup awal, training, dan dukungan teknis.</p>
                 </div>
               </div>
-              {pkg.detail && <p style={{ color: "#666", minHeight: "48px" }}>{pkg.detail}</p>}
-              {pkg.features.length > 0 && (
-                <ul className="feature-list">
-                  {pkg.features.map((feature, idx) => (
-                    <li key={idx}>{feature}</li>
-                  ))}
-                </ul>
-              )}
-              <a
-                href={getPackageWhatsappUrl(pkg)}
-                className={`package-whatsapp-button${siteSettings.whatsappNumber ? "" : " disabled"}`}
-                target={siteSettings.whatsappNumber ? "_blank" : undefined}
-                rel={siteSettings.whatsappNumber ? "noopener noreferrer" : undefined}
-                aria-disabled={siteSettings.whatsappNumber ? undefined : true}
-              >
-                {pkg.computed.isDiscountActive
-                  ? `Pesan Sekarang (Hemat ${pkg.discountPercent}%)`
-                  : "Pesan Paket via WhatsApp"}
-              </a>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      <div className="web-service">
-        <h2>Jasa Pembuatan Website Profesional</h2>
-        <p>
-          Kami juga menyediakan jasa pembuatan website dengan desain modern dan fungsionalitas terbaik untuk
-          meningkatkan bisnis Anda
-        </p>
-
-        <div className="features-grid">
-          <div className="feature-item">
-            <h3>⚡ Performa Cepat</h3>
-            <p>Website dioptimasi untuk kecepatan maksimal</p>
-          </div>
-          <div className="feature-item">
-            <h3>🔒 Aman &amp; Terpercaya</h3>
-            <p>Keamanan data terjamin dengan teknologi terkini</p>
-          </div>
-          <div className="feature-item">
-            <h3>💬 Konsultasi Gratis</h3>
-            <p>Diskusi kebutuhan website Anda bersama expert kami</p>
+      <section className="service-section" aria-labelledby="layanan">
+        <div className="container" style={{ paddingBottom: 0 }}>
+          <h2 id="layanan" className="section-title">
+            Layanan Web &amp; Digital Kami
+          </h2>
+          <p className="section-subtitle" style={{ color: "rgba(226, 232, 240, 0.85)" }}>
+            Solusi menyeluruh untuk memastikan bisnis Anda hadir profesional di ranah digital.
+          </p>
+          <div className="service-grid">
+            {serviceList.map((service, index) => (
+              <div key={service.title} className="service-card animate-on-load" style={{ animationDelay: `${index * 0.1}s` }}>
+                <div className="service-icon" aria-hidden="true">
+                  {service.icon}
+                </div>
+                <h3>{service.title}</h3>
+                <p>{service.description}</p>
+              </div>
+            ))}
           </div>
         </div>
-
-        <p style={{ marginTop: 40, fontSize: "1.1em" }}>
-          Dapatkan website impian Anda dengan konsultasi terbaik dari tim profesional kami
-        </p>
-      </div>
+      </section>
 
       <div className="container" id="artikel">
         <h2 className="section-title">Artikel &amp; Tips Bisnis</h2>
@@ -158,8 +247,10 @@ export default async function HomePage() {
         <div className="article-grid">
           {postList.length === 0 && <p className="muted">Belum ada artikel yang dipublikasikan.</p>}
           {postList.map((post) => (
-            <article key={post.id} className="article-card">
-              <div className="article-icon">{post.icon || "📰"}</div>
+            <article key={post.id} className="article-card animate-on-load">
+              <div className="article-icon" aria-hidden="true">
+                {post.icon || "📰"}
+              </div>
               <h3>{post.title}</h3>
               <p className="article-meta">{formatDate(post.date)}</p>
               {post.excerpt && <p>{post.excerpt}</p>}
@@ -171,75 +262,54 @@ export default async function HomePage() {
         </div>
       </div>
 
-      <div className="container" id="about">
-        <h2 className="section-title">Tentang Kami</h2>
-        <p className="section-subtitle">Mitra terpercaya untuk solusi teknologi bisnis Anda</p>
-
-        <div style={{ maxWidth: 900, margin: "0 auto" }}>
-          <div
-            style={{
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              color: "white",
-              padding: "60px 40px",
-              borderRadius: "20px",
-              marginBottom: "40px",
-              textAlign: "center",
-            }}
-          >
-            <h3 style={{ fontSize: "2em", marginBottom: "20px" }}>Visi Kami</h3>
-            <p style={{ fontSize: "1.2em", lineHeight: 1.8, opacity: 0.95 }}>
-              Menjadi penyedia solusi teknologi terdepan yang membantu setiap bisnis berkembang dengan sistem yang
-              efisien dan terpercaya
-            </p>
-          </div>
-
-          <div className="pricing-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
-            <div className="pricing-card" style={{ textAlign: "center" }}>
-              <div className="card-icon" style={{ margin: "0 auto 20px" }}>
-                🎯
-              </div>
-              <h3>Pengalaman</h3>
-              <p style={{ color: "#666", marginTop: 15 }}>
-                Lebih dari 5 tahun melayani berbagai jenis bisnis dari UMKM hingga perusahaan besar
+      <section className="about-section" id="about">
+        <div className="container" style={{ paddingBottom: 0 }}>
+          <h2 className="section-title">Tentang Kami</h2>
+          <p className="section-subtitle">Mitra teknologi terpercaya untuk setiap perjalanan transformasi digital Anda</p>
+          <div className="about-grid">
+            <div className="about-visual animate-on-load">
+              <h3>Visi Kami</h3>
+              <p>
+                Menjadi partner teknologi yang memberdayakan bisnis lintas industri dengan solusi modern yang adaptif dan
+                berkelanjutan.
+              </p>
+              <p>
+                Kami percaya kesuksesan digital dimulai dari pondasi sistem yang stabil, data yang akurat, dan tim support yang
+                peduli.
               </p>
             </div>
-            <div className="pricing-card" style={{ textAlign: "center" }}>
-              <div className="card-icon" style={{ margin: "0 auto 20px" }}>
-                👥
-              </div>
-              <h3>Tim Profesional</h3>
-              <p style={{ color: "#666", marginTop: 15 }}>
-                Didukung oleh tim developer dan support yang berpengalaman dan siap membantu
+            <div className="about-content animate-on-load animate-delay-2">
+              <p>
+                ZOZOTECH membantu ratusan brand memadukan operasional offline dan online melalui sistem POS, layanan website, dan
+                konsultasi teknologi menyeluruh.
               </p>
-            </div>
-            <div className="pricing-card" style={{ textAlign: "center" }}>
-              <div className="card-icon" style={{ margin: "0 auto 20px" }}>
-                ✨
-              </div>
-              <h3>Inovasi</h3>
-              <p style={{ color: "#666", marginTop: 15 }}>
-                Terus berinovasi menghadirkan fitur-fitur terbaru sesuai kebutuhan pasar
-              </p>
+              <ul className="about-list">
+                {aboutHighlights.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       <div className="contact-section" id="contact">
         <h2 className="section-title">Hubungi Kami</h2>
         <p className="section-subtitle">Konsultasi gratis untuk kebutuhan POS dan website bisnis Anda</p>
         <a id="waBtn" href={whatsappUrl} className="whatsapp-button" target="_blank" rel="noopener noreferrer">
-          <span style={{ fontSize: "1.5em" }}>💬</span> Chat via WhatsApp
+          <span style={{ fontSize: "1.5em" }} aria-hidden="true">
+            💬
+          </span>
+          Chat via WhatsApp
         </a>
-        <p style={{ marginTop: 20, color: "#666" }}>Tim kami siap membantu Anda memilih solusi terbaik</p>
+        <p style={{ marginTop: 20, color: "#64748b" }}>Tim kami siap membantu Anda memilih solusi terbaik</p>
       </div>
 
       <footer>
         <p>
-          &copy; {new Date().getFullYear()} {siteSettings.siteName}. Solusi Kasir &amp; Website Profesional untuk Bisnis
-          Anda.
+          &copy; {new Date().getFullYear()} {siteSettings.siteName}. Solusi Kasir &amp; Website Profesional untuk Bisnis Anda.
         </p>
-        <p style={{ marginTop: 10, opacity: 0.8 }}>Melayani dengan sepenuh hati untuk kesuksesan bisnis Anda</p>
+        <p style={{ marginTop: 10, opacity: 0.85 }}>Melayani dengan sepenuh hati untuk kesuksesan bisnis Anda</p>
       </footer>
     </>
   );
