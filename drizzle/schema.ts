@@ -46,6 +46,7 @@ export const settings = sqliteTable("settings", {
   currency: text("currency").notNull().default("Rp"),
   navbarLogoUrl: text("navbarLogoUrl").default("/logo-zozotech.svg"),
   faviconUrl: text("faviconUrl").default("/favicon.svg"),
+  clientLogos: text("clientLogos"), // JSON array of client logos
 });
 
 export const products = sqliteTable(

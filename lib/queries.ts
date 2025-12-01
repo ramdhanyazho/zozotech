@@ -17,6 +17,13 @@ export type SiteSettings = {
   currency: string;
   navbarLogoUrl: string;
   faviconUrl: string;
+  clients: ClientLogo[];
+};
+
+export type ClientLogo = {
+  name: string;
+  logoUrl: string;
+  websiteUrl: string;
 };
 
 const defaultSettings = {
@@ -26,6 +33,7 @@ const defaultSettings = {
   currency: process.env.SITE_DEFAULT_CURRENCY ?? "Rp",
   navbarLogoUrl: "/logo-zozotech.svg",
   faviconUrl: "/favicon.svg",
+  clients: [],
 };
 
 export async function getSiteSettings(): Promise<SiteSettings> {
@@ -38,6 +46,8 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     if (!row) {
       return defaultSettings;
     }
+
+    const clients = parseClientLogos(row.clientLogos);
     return {
       siteName: row.siteName ?? defaultSettings.siteName,
       whatsappNumber: row.whatsappNumber ?? defaultSettings.whatsappNumber,
@@ -45,10 +55,33 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       currency: row.currency ?? defaultSettings.currency,
       navbarLogoUrl: row.navbarLogoUrl ?? defaultSettings.navbarLogoUrl,
       faviconUrl: row.faviconUrl ?? defaultSettings.faviconUrl,
+      clients,
     };
   } catch (error) {
     logQueryError("getSiteSettings failed", error);
     return defaultSettings;
+  }
+}
+
+function parseClientLogos(raw: unknown): ClientLogo[] {
+  if (typeof raw !== "string" || !raw.trim()) {
+    return defaultSettings.clients;
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return defaultSettings.clients;
+
+    return parsed
+      .map((item) => ({
+        name: typeof item?.name === "string" ? item.name : "",
+        logoUrl: typeof item?.logoUrl === "string" ? item.logoUrl : "",
+        websiteUrl: typeof item?.websiteUrl === "string" ? item.websiteUrl : "",
+      }))
+      .filter((item) => item.name && item.logoUrl && item.websiteUrl);
+  } catch (error) {
+    logQueryError("Failed to parse client logos", error);
+    return defaultSettings.clients;
   }
 }
 

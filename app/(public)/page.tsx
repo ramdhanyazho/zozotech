@@ -273,6 +273,40 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {siteSettings.clients.length > 0 && (
+        <section className="clients-section" aria-labelledby="clients">
+          <div className="container">
+            <div className="clients-header">
+              <div>
+                <p className="clients-eyebrow">Kemitraan</p>
+                <h2 id="clients" className="section-title" style={{ textAlign: "left", marginBottom: 10 }}>
+                  Our Clients
+                </h2>
+                <p className="section-subtitle" style={{ textAlign: "left", marginBottom: 28 }}>
+                  Dipercaya berbagai institusi dan perusahaan dalam mendukung transformasi digital.
+                </p>
+              </div>
+              <Link href="#contact" className="clients-more">
+                See More Clients
+              </Link>
+            </div>
+            <div className="clients-grid">
+              {siteSettings.clients.map((client) => (
+                <a
+                  key={client.name}
+                  className="client-logo-card"
+                  href={client.websiteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img src={client.logoUrl} alt={client.name} />
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       <div className="contact-section" id="contact">
         <h2 className="section-title">Hubungi Kami</h2>
         <p className="section-subtitle">Konsultasi gratis untuk kebutuhan POS dan website bisnis Anda</p>
