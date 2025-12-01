@@ -750,7 +750,7 @@ nav.scrolled {
 
 .clients-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 18px;
   align-items: center;
 }
@@ -758,12 +758,12 @@ nav.scrolled {
 .client-logo-card {
   background: #ffffff;
   border-radius: 14px;
-  padding: 16px;
+  padding: 24px;
   border: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 80px;
+  height: 120px;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
@@ -774,7 +774,7 @@ nav.scrolled {
 }
 
 .client-logo-card img {
-  max-height: 48px;
+  max-height: 80px;
   object-fit: contain;
   filter: grayscale(0.1);
 }
