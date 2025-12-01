@@ -35,6 +35,7 @@ export async function PUT(request: NextRequest) {
   const whatsappMessage = payload.whatsappMessage?.trim() || null;
   const navbarLogoUrl = payload.navbarLogoUrl?.trim() || null;
   const faviconUrl = payload.faviconUrl?.trim() || null;
+  const clientLogos = JSON.stringify(payload.clients ?? []);
 
   const db = getDb();
 
@@ -49,6 +50,7 @@ export async function PUT(request: NextRequest) {
         currency: payload.currency.trim(),
         navbarLogoUrl,
         faviconUrl,
+        clientLogos,
       })
       .onConflictDoUpdate({
         target: settings.id,
@@ -59,6 +61,7 @@ export async function PUT(request: NextRequest) {
           currency: payload.currency.trim(),
           navbarLogoUrl,
           faviconUrl,
+          clientLogos,
         },
       });
 
@@ -87,6 +90,7 @@ async function ensureOptionalSettingsColumns(db: LibSQLDatabase) {
 
   const hasNavbarLogoUrl = rows.some((row: any) => row?.name === "navbarLogoUrl");
   const hasFaviconUrl = rows.some((row: any) => row?.name === "faviconUrl");
+  const hasClientLogos = rows.some((row: any) => row?.name === "clientLogos");
 
   if (!hasNavbarLogoUrl) {
     await addColumnIfMissing(db, "navbarLogoUrl", "text DEFAULT '/logo-zozotech.svg'");
@@ -94,6 +98,10 @@ async function ensureOptionalSettingsColumns(db: LibSQLDatabase) {
 
   if (!hasFaviconUrl) {
     await addColumnIfMissing(db, "faviconUrl", "text DEFAULT '/favicon.svg'");
+  }
+
+  if (!hasClientLogos) {
+    await addColumnIfMissing(db, "clientLogos", "text");
   }
 }
 
@@ -110,7 +118,8 @@ async function addColumnIfMissing(db: LibSQLDatabase, column: string, definition
 function isMissingSettingsColumnError(error: unknown) {
   return (
     includesMessage(error, "no column named navbarLogoUrl") ||
-    includesMessage(error, "no column named faviconUrl")
+    includesMessage(error, "no column named faviconUrl") ||
+    includesMessage(error, "no column named clientLogos")
   );
 }
 

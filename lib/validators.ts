@@ -33,6 +33,16 @@ export const settingsInputSchema = z.object({
   currency: z.string().min(1),
   navbarLogoUrl: z.string().trim().min(1).optional().or(z.literal("")).nullable(),
   faviconUrl: z.string().trim().min(1).optional().or(z.literal("")).nullable(),
+  clients: z
+    .array(
+      z.object({
+        name: z.string().trim().min(1),
+        logoUrl: z.string().trim().min(1),
+        websiteUrl: z.string().trim().url(),
+      })
+    )
+    .optional()
+    .default([]),
 });
 
 export type PostInput = z.infer<typeof postInputSchema>;
